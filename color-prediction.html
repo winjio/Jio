@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Color Prediction - Jiowin</title>
+<link rel="stylesheet" href="css/live-users.css">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;user-select:none;font-family:'Segoe UI',sans-serif}
+body{background:#111;color:#fff;min-height:100vh;display:flex;justify-content:center;overflow:hidden}
+.app{width:100%;max-width:500px;height:100vh;display:flex;flex-direction:column;background:#0f172a;position:relative;overflow-y:auto}
+.top-bar{background:#1e1e1e;display:flex;justify-content:space-between;padding:8px 12px;font-size:12px;color:#aaa;z-index:50}
+.brand{font-weight:900;font-size:16px;color:#fff}
+.brand span{background:#4caf50;color:#000;padding:1px 4px;border-radius:4px;font-size:10px}
+.game-container{display:flex;flex-direction:column;padding:10px;gap:15px;background:linear-gradient(180deg, #1a237e, #0d47a1);flex:1}
+.title-text{font-size:24px;font-weight:900;font-style:italic;text-align:center;background:linear-gradient(90deg, #ff4081, #7c4dff);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:5px}
+.top-section{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.box-wrapper{flex:1;position:relative;height:150px;display:flex;align-items:center;justify-content:center;perspective:800px}
+.box-top{position:absolute;top:20px;width:120px;height:80px;background:#4caf50;border-radius:8px;z-index:2;display:flex;align-items:center;justify-content:center;font-size:40px;font-weight:bold;color:#fff;transition:transform 0.5s ease;border:2px solid #fff;box-shadow:0 4px 10px rgba(0,0,0,0.5)}
+.box-bottom{position:absolute;bottom:20px;width:130px;height:100px;background:#d32f2f;border-radius:12px;z-index:1;display:flex;align-items:center;justify-content:center;font-size:50px;font-weight:bold;color:#fff;transition:background 0.3s;box-shadow:0 4px 10px rgba(0,0,0,0.5)}
+.box-top.open{transform:translateY(-80px) rotateX(40deg);opacity:0}
+.timer-wrapper{width:130px;background:rgba(0,0,0,0.3);border-radius:12px;padding:10px;text-align:center;border:1px solid rgba(255,255,255,0.1)}
+.timer-title{font-size:14px;color:#90caf9;margin-bottom:5px;font-weight:bold}
+.timer-circle{width:60px;height:60px;border-radius:50%;background:conic-gradient(#00e5ff 0%, #1a237e 0%);display:flex;align-items:center;justify-content:center;margin:0 auto}
+.timer-inner{width:50px;height:50px;background:#0d47a1;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:bold;color:#00e5ff}
+.bet-area{display:flex;flex-direction:column;gap:10px}
+.section-title{text-align:center;font-size:12px;color:#90caf9;margin-bottom:4px;font-weight:bold}
+.colors-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
+.color-zone{border-radius:8px;padding:10px 5px;text-align:center;cursor:pointer;box-shadow:0 4px 8px rgba(0,0,0,0.3);display:flex;flex-direction:column;justify-content:center;min-height:70px}
+.color-zone.green{background:#4caf50;border:2px solid #81c784}
+.color-zone.violet{background:#8e24aa;border:2px solid #ce93d8}
+.color-zone.red{background:#d32f2f;border:2px solid #e57373}
+.color-name{font-size:20px;font-weight:900;color:#fff}
+.color-mult{font-size:10px;color:#fff;opacity:0.9}
+.numbers-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:6px}
+.num-zone{aspect-ratio:1;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:bold;color:#fff;cursor:pointer;box-shadow:0 4px 8px rgba(0,0,0,0.3)}
+.num-zone.bg-green{background:linear-gradient(135deg, #66bb6a, #388e3c);border:1px solid #81c784}
+.num-zone.bg-red{background:linear-gradient(135deg, #ef5350, #b71c1c);border:1px solid #e57373}
+.num-zone.bg-violet{background:linear-gradient(135deg, #ab47bc 50%, #66bb6a 50%);border:1px solid #ce93d8}
+.chip-stack{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:bold;color:#fff;border:2px dashed #fff;z-index:20}
+.bottom-controls{background:rgba(0,0,0,0.2);padding:10px;border-radius:12px}
+.bal-row{display:flex;justify-content:space-between;font-size:12px;color:#fff;margin-bottom:10px}
+.bal-row span{color:#ffd700;font-weight:bold}
+.btn-row{display:grid;grid-template-columns:1fr 1.5fr 1fr 1fr;gap:6px;margin-bottom:10px}
+.ctrl-btn{background:linear-gradient(180deg, #1976d2, #0d47a1);border:1px solid #42a5f5;border-radius:8px;padding:8px 0;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;color:#fff;font-size:10px}
+.ctrl-btn.bet-btn{flex-direction:row;gap:5px;font-size:14px;font-weight:bold}
+.history-section{background:#0d47a1;border-radius:8px;overflow:hidden;border:1px solid #1565c0}
+.tab-content{padding:10px;height:100px;overflow-y:auto;font-size:11px;color:#ccc}
+.history-table{width:100%;border-collapse:collapse}
+.history-table th{text-align:left;padding:4px;color:#90caf9;font-weight:normal;border-bottom:1px solid rgba(255,255,255,0.1)}
+.result-overlay{position:absolute;inset:0;background:rgba(0,0,0,0.8);z-index:100;display:none;flex-direction:column;align-items:center;justify-content:center}
+.result-overlay.show{display:flex}
+.result-text{font-size:36px;font-weight:bold;color:#4caf50;margin-bottom:10px;text-align:center}
+.result-amount{font-size:24px;color:#ffd700}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="top-bar"><div>☰ 🔔</div><div class="brand">Jiowin</div><div></div></div>
+  <div class="game-container">
+    <div class="title-text">Color Prediction</div>
+    <div class="top-section">
+      <div class="box-wrapper"><div class="box-top" id="boxTop">?</div><div class="box-bottom" id="boxBottom">?</div></div>
+      <div class="timer-wrapper"><div class="timer-title">Countdown</div><div class="timer-circle" id="timerCircle"><div class="timer-inner" id="timerText">30</div></div></div>
+    </div>
+    <div class="bet-area">
+      <div><div class="section-title">Colors</div><div class="colors-grid">
+        <div class="color-zone green" onclick="placeBet('green', this)"><div class="color-name">Green</div><div class="color-mult">x2.0 or x1.6</div></div>
+        <div class="color-zone violet" onclick="placeBet('violet', this)"><div class="color-name">Violet</div><div class="color-mult">x4.8</div></div>
+        <div class="color-zone red" onclick="placeBet('red', this)"><div class="color-name">Red</div><div class="color-mult">x2.0 or x1.6</div></div>
+      </div></div>
+      <div><div class="section-title">Numbers <span style="color:#ffd700">x9.6</span></div><div class="numbers-grid" id="numbersGrid"></div></div>
+    </div>
+    <div class="bottom-controls">
+      <div class="bal-row"><span>Balance: ₹<span id="balUI">1000</span></span><span>WIN: ₹<span id="winUI">0</span></span></div>
+      <div class="btn-row"><div class="ctrl-btn" onclick="againBet()">🔄 again</div><div class="ctrl-btn bet-btn" onclick="changeChip()">Bet <span id="chipUI">10</span></div><div class="ctrl-btn" onclick="undoBet()">↩️ undo</div><div class="ctrl-btn" onclick="clearBet()" style="color:#ff5252">❌ clear</div></div>
+      <div class="history-section"><div class="tab-content"><table class="history-table"><thead><tr><th>Price</th><th>Result</th><th>Time</th><th>WIN</th></tr></thead><tbody id="historyBody"><tr><td colspan="4" style="text-align:center">No data</td></tr></tbody></table></div></div>
+    </div>
+  </div>
+  <div class="result-overlay" id="resultOverlay"><div class="result-text" id="resultText">WIN!</div><div class="result-amount" id="resultAmt">+0</div></div>
+</div>
+<script src="js/game-wallet.js"></script>
+<script>
+const CHIPS = [10, 50, 100, 500], COLORS = {0:'violet', 1:'green', 2:'red', 3:'green', 4:'red', 5:'violet', 6:'red', 7:'green', 8:'red', 9:'green'};
+let balance = window.loadGameWalletBalance(1000), currentChipIdx = 0, userBets = {}, lastBet = {}, isRolling = false, countdown = 30, timerInterval;
+function buildNumbersGrid() {
+ const grid = document.getElementById('numbersGrid');
+ for(let i=0;i<=9;i++) { const div=document.createElement('div'); let bgClass='bg-green'; if(i===0||i===5) bgClass='bg-violet'; else if(i%2===0) bgClass='bg-red'; div.className=`num-zone ${bgClass}`; div.textContent=i; div.onclick=function(){placeBet(i.toString(),this);}; grid.appendChild(div); }
+}
+function updateUI() {
+  window.syncGameWalletBalance(balance);
+ document.getElementById('balUI').textContent=balance.toLocaleString(); document.getElementById('chipUI').textContent=CHIPS[currentChipIdx]; document.querySelectorAll('.chip-stack').forEach(el=>el.remove());
+ for(const [zone,amt] of Object.entries(userBets)) { const el=document.querySelector(`[onclick="placeBet('${zone}', this)"]`); if(el) { const chip=document.createElement('div'); chip.className=`chip-stack c${amt>=500?500:amt>=100?100:amt>=50?50:10}`; chip.textContent=amt; el.style.position='relative'; el.appendChild(chip); } }
+}
+function changeChip(){currentChipIdx=(currentChipIdx+1)%CHIPS.length;updateUI();beep(600,0.05);}
+function placeBet(zone,el){if(isRolling)return;const amt=CHIPS[currentChipIdx];if(balance<amt){beep(200,0.1);return;}balance-=amt;userBets[zone]=(userBets[zone]||0)+amt;updateUI();beep(800,0.05);el.style.transform='scale(0.9)';setTimeout(()=>el.style.transform='scale(1)',100);if(!isRolling&&!timerInterval)startTimer();}
+function clearBet(){if(isRolling)return;balance+=Object.values(userBets).reduce((a,b)=>a+b,0);userBets={};updateUI();}
+function undoBet(){if(isRolling)return;const zones=Object.keys(userBets);if(!zones.length)return;const l=zones[zones.length-1];balance+=userBets[l];delete userBets[l];updateUI();}
+function againBet(){if(isRolling)return;clearBet();const t=Object.values(lastBet).reduce((a,b)=>a+b,0);if(t===0||balance<t)return;balance-=t;userBets={...lastBet};updateUI();}
+function startTimer(){if(timerInterval)clearInterval(timerInterval);countdown=30;const topBox=document.getElementById('boxTop');topBox.classList.remove('open');topBox.textContent='?';timerInterval=setInterval(()=>{countdown-=0.1;if(countdown<=0){clearInterval(timerInterval);timerInterval=null;drawResult();}else{document.getElementById('timerCircle').style.background=`conic-gradient(#00e5ff ${(countdown/30)*100}%, #1a237e ${(countdown/30)*100}%)`;document.getElementById('timerText').textContent=Math.ceil(countdown);}},100);}
+function drawResult(){isRolling=true;lastBet={...userBets};const winNum=Math.floor(Math.random()*10);const winColor=COLORS[winNum];const boxBottom=document.getElementById('boxBottom');boxBottom.textContent=winNum;if(winColor==='green')boxBottom.style.background='#4caf50';else if(winColor==='red')boxBottom.style.background='#d32f2f';else boxBottom.style.background='#8e24aa';document.getElementById('boxTop').classList.add('open');beep(600,0.2);setTimeout(()=>evaluate(winNum,winColor),600);}
+function evaluate(num,color){isRolling=false;let totalWin=0,totalBet=Object.values(userBets).reduce((a,b)=>a+b,0);for(const [zone,amt] of Object.entries(userBets)){let win=false,mult=1;if(zone===num.toString()){win=true;mult=9.6;}else if(zone===color){win=true;mult=color==='violet'?4.8:(num===0||num===5?1.6:2.0);}if(win)totalWin+=amt*mult;}
+ const tbody=document.getElementById('historyBody');if(tbody.children[0]&&tbody.children[0].children.length===1)tbody.innerHTML='';const tr=document.createElement('tr');const now=new Date().toLocaleTimeString('en-US',{hour12:false,hour:'2-digit',minute:'2-digit'});const resColor=color==='green'?'#4caf50':color==='red'?'#d32f2f':'#8e24aa';tr.innerHTML=`<td>₹${totalBet>0?totalBet:0}</td><td style="color:${resColor};font-weight:bold">${num} ${color.toUpperCase()}</td><td>${now}</td><td>${totalWin>0?'+'+Math.floor(totalWin-totalBet):'-'+totalBet}</td>`;tbody.insertBefore(tr,tbody.firstChild);if(tbody.children.length>5)tbody.removeChild(tbody.lastChild);
+ if(totalWin>0){balance+=Math.floor(totalWin);showResult(`WIN! (${num} ${color.toUpperCase()})`,totalWin-totalBet);playWinSound();}else if(totalBet>0){showResult(`LOSE (${num} ${color.toUpperCase()})`,-totalBet);beep(200,0.3);}else{showResult(`Result: ${num} ${color.toUpperCase()}`,0);}userBets={};updateUI();setTimeout(()=>{document.getElementById('resultOverlay').classList.remove('show');startTimer();},3000);}
+function showResult(type,amount){document.getElementById('resultText').textContent=type;document.getElementById('resultText').style.color=type.includes('WIN')?'#4caf50':type.includes('LOSE')?'#f44336':'#ffd700';document.getElementById('resultAmt').textContent=amount!==0?(amount>0?'+':'')+Math.floor(amount):'';document.getElementById('resultOverlay').classList.add('show');}
+let audioCtx;function beep(freq,dur,type='sine',vol=0.1){try{if(!audioCtx)audioCtx=new(window.AudioContext||window.webkitAudioContext)();const o=audioCtx.createOscillator(),g=audioCtx.createGain();o.type=type;o.frequency.value=freq;g.gain.setValueAtTime(vol,audioCtx.currentTime);g.gain.exponentialRampToValueAtTime(0.001,audioCtx.currentTime+dur);o.connect(g);g.connect(audioCtx.destination);o.start();o.stop(audioCtx.currentTime+dur);}catch(e){}}
+function playWinSound(){[523,659,784,1047].forEach((f,i)=>setTimeout(()=>beep(f,0.2,'triangle',0.1),i*100));}
+window.onload=()=>{buildNumbersGrid();updateUI();startTimer();};
+</script>
+<script src="js/live-users.js"></script>
+</body>
+</html>

@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Sic Bo - Jiowin</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;user-select:none;font-family:'Segoe UI',sans-serif}
+body{background:#111;color:#fff;min-height:100vh;display:flex;justify-content:center;overflow:hidden}
+.app{width:100%;max-width:500px;height:100vh;display:flex;flex-direction:column;background:#0a0a0a;position:relative}
+.top-bar{background:#1e1e1e;display:flex;justify-content:space-between;padding:8px 12px;font-size:12px;color:#aaa;border-bottom:1px solid #333;z-index:50}
+.brand{font-weight:900;font-size:16px;color:#fff;letter-spacing:1px;}
+.brand span{background:#4caf50;color:#000;padding:1px 4px;border-radius:4px;font-size:10px}
+.history-header{background:#2a1a12;padding:4px;text-align:center;font-size:10px;color:#d4c9b8}
+.history-strip{display:flex;justify-content:space-between;background:#1e130c;padding:4px 6px;gap:2px;z-index:50}
+.history-item{display:flex;flex-direction:column;align-items:center;font-size:9px;flex:1}
+.hist-dice{display:grid;grid-template-columns:1fr 1fr 1fr;gap:1px;background:#fff;padding:1px;border-radius:2px;width:24px;height:18px}
+.hist-dice.red{background:#ffcccc}
+.hist-num{color:#aaa;font-weight:bold}
+.main-area{flex:1;position:relative;background:radial-gradient(ellipse at center,#2e8b57 0%,#1e5c36 70%,#0d2e19 100%);display:flex;align-items:center;justify-content:center;min-height:180px}
+.side-players{position:absolute;left:5px;top:5px;display:flex;flex-direction:column;gap:8px;z-index:10}
+.player{display:flex;align-items:center;gap:4px}
+.player-avatar{width:34px;height:34px;border-radius:50%;border:2px solid #ffd700;overflow:hidden;position:relative}
+.player-avatar img{width:100%;height:100%;object-fit:cover}
+.player-vip{position:absolute;bottom:-4px;right:-4px;background:#ffd700;color:#000;font-size:7px;font-weight:bold;padding:1px 2px;border-radius:3px;border:1px solid #fff}
+.player-info .coins{font-size:9px;color:#ffd700;font-weight:bold;text-shadow:1px 1px 2px #000}
+.dome-container{position:relative;width:180px;height:130px;display:flex;align-items:flex-end;justify-content:center;margin-top:-20px}
+.dome-glass{position:absolute;inset:0;border-radius:90px 90px 15px 15px;background:linear-gradient(135deg,rgba(255,255,255,0.4),rgba(255,255,255,0.05));border:2px solid rgba(255,255,255,0.3);border-bottom:4px solid #555;z-index:5;pointer-events:none}
+.dome-base{position:absolute;bottom:0;width:160px;height:25px;background:linear-gradient(180deg,#555,#222);border-radius:50%;z-index:4}
+.dice-wrap{position:relative;z-index:3;display:flex;gap:8px;margin-bottom:20px}
+.dice{width:40px;height:40px;background:#fff;border-radius:6px;display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(3,1fr);padding:4px}
+.dot{background:#d32f2f;border-radius:50%;width:8px;height:8px;margin:auto}
+.dice.rolling{animation:shakeDice 0.15s infinite}
+@keyframes shakeDice{50%{transform:translate(2px,-2px) rotate(10deg)}100%{transform:translate(-2px,2px) rotate(-5deg)}}
+.timer-circle{position:absolute;right:15px;top:30%;width:45px;height:45px;border-radius:50%;background:conic-gradient(#ffd700 0%,#333 0%);display:flex;align-items:center;justify-content:center;z-index:10}
+.timer-inner{width:39px;height:39px;background:#111;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:bold;color:#ffd700}
+.sub-header{background:#3e2723;display:flex;justify-content:space-between;padding:4px 10px;font-size:11px;color:#d4c9b8;z-index:50}
+.table-section{padding:2px;display:flex;flex-direction:column;gap:2px;background:#1b5e20;flex:1;overflow-y:auto}
+.grid-row{display:grid;gap:2px}
+.grid-3{grid-template-columns:1fr 1.2fr 1fr}
+.grid-4{grid-template-columns:repeat(4,1fr)}
+.grid-7{grid-template-columns:repeat(7,1fr)}
+.grid-6{grid-template-columns:repeat(6,1fr)}
+.zone{background:linear-gradient(180deg,#2e7d32,#1b5e20);border:1px solid #4caf50;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;position:relative;min-height:40px;color:#fff}
+.zone.red{background:linear-gradient(180deg,#c62828,#8e0000);border-color:#e53935}
+.zone .title{font-size:14px;font-weight:bold}
+.zone .odds{font-size:10px;color:#e0e0e0;background:rgba(0,0,0,0.4);padding:1px 4px;border-radius:4px;margin-top:2px}
+.dice-icon{display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(3,1fr);width:20px;height:20px;background:#fff;border-radius:3px;padding:1px;margin:2px auto}
+.dice-icon .d{width:3px;height:3px;background:#d32f2f;border-radius:50%;margin:auto}
+.dice-group{display:flex;gap:2px;justify-content:center}
+.chip-stack{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:bold;color:#fff;border:2px dashed #fff;z-index:10}
+.chip-stack.c10{background:#888}.chip-stack.c50{background:#e53935}.chip-stack.c100{background:#43a047}
+.bottom-bar{background:#1e130c;padding:8px 10px;display:flex;align-items:center;justify-content:space-between;z-index:50}
+.user-profile{display:flex;align-items:center;gap:8px}
+.user-avatar{width:40px;height:40px;border-radius:50%;border:2px solid #ff9800;overflow:hidden}
+.user-avatar img{width:100%;height:100%}
+.user-details .bal{font-size:12px;color:#ffd700;font-weight:bold}
+.bet-controls{display:flex;gap:6px;align-items:center}
+.action-btn{display:flex;flex-direction:column;align-items:center;justify-content:center;color:#ccc;font-size:9px;cursor:pointer;width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,0.1)}
+.chip-selector{width:48px;height:48px;border-radius:50%;background:#fff;border:3px solid #ffd700;display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:bold;color:#000;cursor:pointer}
+.result-overlay{position:absolute;inset:0;background:rgba(0,0,0,0.7);z-index:100;display:none;flex-direction:column;align-items:center;justify-content:center}
+.result-overlay.show{display:flex}
+.result-text{font-size:40px;font-weight:bold;color:#4caf50;margin-bottom:10px}
+.result-amount{font-size:24px;color:#ffd700}
+</style>
+  <link rel="stylesheet" href="css/live-users.css">
+</head>
+<body>
+<div class="app">
+  <div class="top-bar"><div>☰ 🔔</div><div class="brand">Jiowin</div></div>
+  <div class="history-header"><span>4~10 53%</span> | <span>11~17 45%</span> Calculated from last 100 rounds.</div>
+  <div class="history-strip" id="historyStrip"></div>
+  <div class="main-area">
+    <div class="side-players">
+      <div class="player"><div class="player-avatar"><img src="https://i.pravatar.cc/100?img=5"><div class="player-vip">407</div></div><div class="player-info"><span class="coins">🪙 9,998.6</span></div></div>
+      <div class="player"><div class="player-avatar"><img src="https://i.pravatar.cc/100?img=12"><div class="player-vip">5672</div></div><div class="player-info"><span class="coins">🪙 6,312.79</span></div></div>
+    </div>
+    <div class="dome-container">
+      <div class="dome-glass"></div><div class="dome-base"></div>
+      <div class="dice-wrap" id="diceWrap"><div class="dice" id="dice1"></div><div class="dice" id="dice2"></div><div class="dice" id="dice3"></div></div>
+    </div>
+    <div class="timer-circle" id="timerCircle"><div class="timer-inner" id="timerText">15</div></div>
+  </div>
+  <div class="sub-header"><span>⚙️ 20</span><span>Roadmap ▼</span><span>Multiple Mode</span><span>▲ Min 10 Max 200</span></div>
+  <div class="table-section">
+    <div class="grid-row grid-3">
+      <div class="zone" onclick="placeBet('small', this)"><div class="title">SMALL</div><div class="odds">1:1</div></div>
+      <div class="zone" onclick="placeBet('any_triple', this)"><div class="title">Any Triple</div><div class="odds">1:30</div></div>
+      <div class="zone red" onclick="placeBet('big', this)"><div class="title">BIG</div><div class="odds">1:1</div></div>
+    </div>
+    <div class="grid-row grid-4" style="margin-top:2px">
+      <div class="zone" onclick="placeBet('double_1', this)"><div class="dice-icon"><div class="d"></div><div></div><div></div><div></div><div class="d"></div><div></div><div></div><div></div><div></div></div></div>
+      <div class="zone" onclick="placeBet('double_2', this)"><div class="dice-icon"><div class="d"></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div class="d"></div></div></div>
+      <div class="zone" onclick="placeBet('double_3', this)"><div class="dice-icon"><div class="d"></div><div></div><div class="d"></div><div></div><div></div><div></div><div class="d"></div><div></div><div class="d"></div></div></div>
+      <div class="zone" onclick="placeBet('double_4', this)"><div class="dice-icon"><div class="d"></div><div></div><div class="d"></div><div></div><div class="d"></div><div></div><div class="d"></div><div></div><div class="d"></div></div></div>
+    </div>
+    <div class="grid-row grid-7" style="margin-top:2px">
+      <div class="zone" onclick="placeBet('sum_4', this)"><div class="title">4</div><div class="odds">1:60</div></div>
+      <div class="zone" onclick="placeBet('sum_5', this)"><div class="title">5</div><div class="odds">1:30</div></div>
+      <div class="zone" onclick="placeBet('sum_6', this)"><div class="title">6</div><div class="odds">1:18</div></div>
+      <div class="zone" onclick="placeBet('sum_7', this)"><div class="title">7</div><div class="odds">1:12</div></div>
+      <div class="zone" onclick="placeBet('sum_8', this)"><div class="title">8</div><div class="odds">1:8</div></div>
+      <div class="zone" onclick="placeBet('sum_9', this)"><div class="title">9</div><div class="odds">1:6.5</div></div>
+      <div class="zone" onclick="placeBet('sum_10', this)"><div class="title">10</div><div class="odds">1:6</div></div>
+    </div>
+    <div class="grid-row grid-6" style="margin-top:2px">
+      <div class="zone" onclick="placeBet('single_1', this)"><div class="dice-icon"><div class="d"></div></div></div>
+      <div class="zone" onclick="placeBet('single_2', this)"><div class="dice-icon"><div class="d"></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div class="d"></div></div></div>
+      <div class="zone" onclick="placeBet('single_3', this)"><div class="dice-icon"><div class="d"></div><div></div><div class="d"></div><div></div><div></div><div></div><div class="d"></div><div></div><div class="d"></div></div></div>
+      <div class="zone" onclick="placeBet('single_4', this)"><div class="dice-icon"><div class="d"></div><div></div><div class="d"></div><div></div><div class="d"></div><div></div><div class="d"></div><div></div><div class="d"></div></div></div>
+      <div class="zone" onclick="placeBet('single_5', this)"><div class="dice-icon"><div class="d"></div><div></div><div class="d"></div><div></div><div class="d"></div><div></div><div class="d"></div><div></div><div class="d"></div></div></div>
+      <div class="zone" onclick="placeBet('single_6', this)"><div class="dice-icon"><div class="d"></div><div></div><div class="d"></div><div class="d"></div><div></div><div class="d"></div><div class="d"></div><div></div><div class="d"></div></div></div>
+    </div>
+  </div>
+  <div class="bottom-bar">
+    <div class="user-profile"><div class="user-avatar"><img src="https://i.pravatar.cc/100?img=11"></div><div class="user-details"><span class="bal">Balance ₹<span id="balUI">1000</span></span></div></div>
+    <div class="bet-controls">
+      <div class="action-btn" onclick="againBet()">🔄</div><div class="action-btn" onclick="doubleBet()">×2</div>
+      <div class="chip-selector" id="chipBtn" onclick="changeChip()"><span id="chipUI">10</span></div>
+      <div class="action-btn" onclick="undoBet()">↩️</div><div class="action-btn" onclick="clearBet()" style="color:#ff5252">❌</div>
+    </div>
+  </div>
+  <div class="result-overlay" id="resultOverlay"><div class="result-text" id="resultText">WIN!</div><div class="result-amount" id="resultAmt">+0</div></div>
+</div>
+<script src="js/game-wallet.js"></script>
+<script>
+const CHIPS = [10, 50, 100, 500];
+const DICE_PATTERNS = {1:[4], 2:[0,8], 3:[0,4,8], 4:[0,2,6,8], 5:[0,2,4,6,8], 6:[0,2,3,5,6,8]};
+let balance = window.loadGameWalletBalance(1000), currentChipIdx = 0, userBets = {}, lastBet = {}, isRolling = false, countdown = 15, timerInterval;
+
+function initDice() { ['dice1','dice2','dice3'].forEach(id => drawDice(document.getElementById(id), 1)); }
+function updateUI() {
+  window.syncGameWalletBalance(balance);
+  window.syncGameWalletBalance(balance);
+  document.getElementById('balUI').textContent = balance.toLocaleString();
+  document.getElementById('chipUI').textContent = CHIPS[currentChipIdx];
+  document.querySelectorAll('.chip-stack').forEach(el => el.remove());
+  for(const [zone, amt] of Object.entries(userBets)) {
+    const el = document.querySelector(`[onclick="placeBet('${zone}', this)"]`);
+    if(el) { const chip = document.createElement('div'); chip.className = `chip-stack c${amt>=100?100:amt>=50?50:10}`; chip.textContent = amt; el.style.position='relative'; el.appendChild(chip); }
+  }
+}
+function changeChip() { currentChipIdx = (currentChipIdx + 1) % CHIPS.length; updateUI(); beep(600, 0.05); }
+function placeBet(zone, el) {
+  if(isRolling) return; const amt = CHIPS[currentChipIdx];
+  if(balance < amt) { beep(200, 0.1); return; }
+  balance -= amt; userBets[zone] = (userBets[zone] || 0) + amt; updateUI(); beep(800, 0.05);
+  el.style.transform = 'scale(0.95)'; setTimeout(()=>el.style.transform = 'scale(1)', 100);
+  if(!isRolling && !timerInterval) startTimer();
+}
+function clearBet() { if(isRolling) return; balance += Object.values(userBets).reduce((a,b)=>a+b,0); userBets = {}; updateUI(); }
+function undoBet() { if(isRolling) return; const zones = Object.keys(userBets); if(!zones.length) return; const l = zones[zones.length-1]; balance += userBets[l]; delete userBets[l]; updateUI(); }
+function doubleBet() { if(isRolling) return; const t = Object.values(userBets).reduce((a,b)=>a+b,0); if(t === 0 || balance < t) return; balance -= t; for(const z in userBets) userBets[z] *= 2; updateUI(); }
+function againBet() { if(isRolling) return; clearBet(); const t = Object.values(lastBet).reduce((a,b)=>a+b,0); if(t === 0 || balance < t) return; balance -= t; userBets = { ...lastBet }; updateUI(); }
+
+function startTimer() {
+  if(timerInterval) clearInterval(timerInterval); countdown = 15;
+  timerInterval = setInterval(() => {
+    countdown -= 0.1;
+    if(countdown <= 0) { clearInterval(timerInterval); timerInterval = null; rollDice(); }
+    else { document.getElementById('timerCircle').style.background = `conic-gradient(#ffd700 ${(countdown/15)*100}%, #333 ${(countdown/15)*100}%)`; document.getElementById('timerText').textContent = Math.ceil(countdown); }
+  }, 100);
+}
+
+function rollDice() {
+  isRolling = true; lastBet = { ...userBets };
+  const dice = [document.getElementById('dice1'), document.getElementById('dice2'), document.getElementById('dice3')];
+  dice.forEach(d=>d.classList.add('rolling'));
+  let ticks = 0;
+  const iv = setInterval(() => {
+    dice.forEach(d=>{ d.innerHTML=''; for(let i=0;i<9;i++){ const div=document.createElement('div'); if(DICE_PATTERNS[Math.floor(Math.random()*6)+1].includes(i)) div.className='dot'; d.appendChild(div); } });
+    beep(400+Math.random()*200, 0.03); if(++ticks>15) clearInterval(iv);
+  }, 100);
+  setTimeout(() => {
+    dice.forEach(d=>d.classList.remove('rolling'));
+    const a = Math.floor(Math.random()*6)+1, b = Math.floor(Math.random()*6)+1, c = Math.floor(Math.random()*6)+1;
+    drawDice(dice[0], a); drawDice(dice[1], b); drawDice(dice[2], c); beep(800, 0.2);
+    setTimeout(()=>evaluateRound(a,b,c), 500);
+  }, 1500);
+}
+
+function evaluateRound(a,b,c) {
+  isRolling = false; const sum = a+b+c, isTriple = a===b && b===c; let totalWin = 0, totalBet = 0;
+  for(const [zone, amt] of Object.entries(userBets)) {
+    totalBet += amt; let win = 0;
+    if(zone==='small' && !isTriple && sum>=4 && sum<=10) win=amt*2;
+    else if(zone==='big' && !isTriple && sum>=11 && sum<=17) win=amt*2;
+    else if(zone==='any_triple' && isTriple) win=amt*31;
+    else if(zone.startsWith('sum_') && parseInt(zone.split('_')[1])===sum) {
+      const odds={4:61,17:61,5:31,16:31,6:19,15:19,7:13,14:13,8:9,13:9,9:7.5,12:7.5,10:7,11:7}; win=amt*(odds[sum]||1);
+    }
+    else if(zone.startsWith('single_')) {
+      const val=parseInt(zone.split('_')[1]); let cnt=0; if(a===val)cnt++; if(b===val)cnt++; if(c===val)cnt++; if(cnt>0) win=amt*(1+cnt);
+    }
+    else if(zone.startsWith('double_')) {
+      const val=parseInt(zone.split('_')[1]); if((a===val&&b===val)||(b===val&&c===val)||(a===val&&c===val)) win=amt*11;
+    }
+    totalWin += win;
+  }
+  if(totalWin > 0) { balance += totalWin; showResult('WIN', totalWin - totalBet); playWinSound(); }
+  else if(totalBet > 0) { showResult('LOSE', -totalBet); beep(200, 0.3); }
+  if (totalBet > 0) window.recordGameRound(totalWin - totalBet);
+  userBets = {}; updateUI();
+  setTimeout(() => { document.getElementById('resultOverlay').classList.remove('show'); startTimer(); }, 2500);
+}
+
+function drawDice(el, num) {
+  el.innerHTML = ''; for(let i=0;i<9;i++){ const d=document.createElement('div'); if(DICE_PATTERNS[num].includes(i)) d.className='dot'; el.appendChild(d); }
+}
+function showResult(type, amount) {
+  const o=document.getElementById('resultOverlay'), t=document.getElementById('resultText'), a=document.getElementById('resultAmt');
+  t.textContent = type; t.style.color = type==='WIN'?'#4caf50':'#f44336'; a.textContent = (amount>0?'+':'')+amount; a.style.color='#ffd700'; o.classList.add('show');
+}
+let audioCtx;
+function beep(freq, dur, type='sine', vol=0.1) { try { if(!audioCtx) audioCtx = new (window.AudioContext||window.webkitAudioContext)(); const o = audioCtx.createOscillator(), g = audioCtx.createGain(); o.type=type; o.frequency.value=freq; g.gain.setValueAtTime(vol, audioCtx.currentTime); g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime+dur); o.connect(g); g.connect(audioCtx.destination); o.start(); o.stop(audioCtx.currentTime+dur); } catch(e) {} }
+function playWinSound() { [523, 659, 784, 1047].forEach((f,i)=>setTimeout(()=>beep(f,0.2,'triangle',0.1), i*100)); }
+window.onload = () => { initDice(); updateUI(); startTimer(); };
+</script>
+  <script src="js/live-users.js"></script>
+</body>
+</html>

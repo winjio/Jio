@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Cricket Roulette - Jiowin</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;user-select:none;font-family:'Segoe UI',sans-serif}
+body{background:#0a0a0a;color:#fff;min-height:100vh;display:flex;justify-content:center;overflow:hidden}
+.app{width:100%;max-width:500px;height:100vh;display:flex;flex-direction:column;background:#0a0a0a;position:relative;border:2px solid #111}
+.top-bar{background:#1e1e1e;display:flex;justify-content:space-between;padding:8px 12px;font-size:12px;color:#aaa;z-index:50}
+.brand{font-weight:900;font-size:16px;color:#fff}
+.brand span{background:#4caf50;color:#000;padding:1px 4px;border-radius:4px;font-size:10px}
+.title-bar{text-align:center;font-size:22px;font-weight:900;color:#fff;text-shadow:0 0 10px #00aaff;padding:5px;font-style:italic}
+.history-bar{display:flex;align-items:center;gap:4px;background:#111;padding:4px 8px;border-bottom:1px solid #333;height:30px}
+.hist-icon{width:24px;height:24px;border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:10px;background:#222;border:1px solid #444}
+.hist-timer{margin-left:auto;background:#000;color:#0f0;font-family:monospace;font-size:16px;padding:2px 8px;border-radius:4px;border:1px solid #333}
+.game-board{flex:1;display:flex;position:relative;overflow:hidden;background:#0a0a0a;padding:4px}
+.border-glow{position:absolute;inset:0;box-shadow:inset 0 0 20px rgba(0,150,255,0.3);pointer-events:none;z-index:10;border:2px solid rgba(0,150,255,0.5);border-radius:8px}
+.board-grid{display:flex;width:100%;gap:2px;height:100%}
+.col-left,.col-right{width:40px;display:flex;flex-direction:column;gap:2px}
+.center-grid{flex:1;display:flex;flex-direction:column;gap:2px}
+.cell{display:flex;flex-direction:column;align-items:center;justify-content:center;font-weight:bold;font-size:10px;cursor:pointer;position:relative;border:1px solid rgba(255,255,255,0.1);text-shadow:1px 1px 2px #000;overflow:hidden}
+.bg-blue{background:linear-gradient(135deg,#0b2d5e,#12448c);border-color:#1e88e5}
+.bg-red{background:linear-gradient(135deg,#5e0b0b,#8c1212);border-color:#e53935}
+.bg-gold{background:linear-gradient(135deg,#b8860b,#ffd700);color:#000;border-color:#fff}
+.side-cell{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:8px}
+.row-1x3{display:flex;height:40px;gap:2px}
+.row-1x3 .cell{flex:1}
+.row-2x{display:flex;height:45px;gap:2px}
+.row-2x .cell{flex:1}
+.row-1x1{display:flex;height:40px;gap:2px}
+.row-1x1 .cell{flex:1}
+.row-battle{display:flex;height:70px;gap:2px}
+.row-battle .cell{flex:1;font-size:16px}
+.mult{font-size:14px;font-weight:900;background:#000;padding:1px 6px;border-radius:4px;border:1px solid #555;margin-top:2px}
+.chip-stack{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:20px;height:20px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:bold;color:#fff;border:2px dashed #fff;z-index:20}
+.bottom-bar{background:#1e1e1e;padding:8px 10px;display:flex;flex-direction:column;z-index:50}
+.bar-top{display:flex;justify-content:space-between;font-size:11px;color:#aaa;margin-bottom:8px}
+.bar-controls{display:flex;justify-content:space-between;align-items:center}
+.action-btn{display:flex;flex-direction:column;align-items:center;justify-content:center;color:#ccc;font-size:9px;cursor:pointer;width:40px;height:40px;border-radius:50%;background:rgba(255,255,255,0.1)}
+.chip-selector{width:50px;height:50px;border-radius:50%;background:#fff;border:4px solid #4caf50;display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:bold;color:#000;cursor:pointer}
+.ball-overlay{position:absolute;width:24px;height:24px;background:radial-gradient(circle at 30% 30%, #ff4d4d, #8b0000);border-radius:50%;box-shadow:0 0 15px #ff0000;z-index:100;display:none;pointer-events:none;transition:all 0.1s linear}
+.ball-overlay.spinning{display:block;animation:ballBounce 0.3s infinite alternate}
+@keyframes ballBounce{from{transform:translateY(0)}to{transform:translateY(-10px)}}
+.result-overlay{position:absolute;inset:0;background:rgba(0,0,0,0.85);z-index:200;display:none;flex-direction:column;align-items:center;justify-content:center}
+.result-overlay.show{display:flex}
+.result-text{font-size:40px;font-weight:900;margin-bottom:10px;color:#4caf50}
+.result-amount{font-size:28px;color:#ffd700;font-weight:bold}
+</style>
+  <link rel="stylesheet" href="css/live-users.css">
+</head>
+<body>
+<div class="app">
+  <div class="top-bar"><div>☰ 🔔</div><div class="brand">Jiowin</div></div>
+  <div class="title-bar">CRICKET ROULETTE</div>
+  <div class="history-bar" id="historyBar"><div class="hist-icon">🏏</div><div class="hist-icon">🏆</div><div class="hist-icon">🛡️</div><div class="hist-icon">🔥</div><div class="hist-timer" id="histTimer">00</div></div>
+  <div class="game-board" id="gameBoard">
+    <div class="border-glow"></div>
+    <div class="board-grid">
+      <div class="col-left">
+        <div class="cell bg-blue" onclick="placeBet('mi_side', this)"><div style="font-size:14px">🛡️</div><div>MI</div></div><div class="cell bg-red" onclick="placeBet('kxip_side', this)"><div style="font-size:14px">🦁</div><div>KXIP</div></div><div class="cell bg-blue" onclick="placeBet('kkr_side', this)"><div style="font-size:14px">⚔️</div><div>KKR</div></div><div class="cell bg-blue" onclick="placeBet('csk_side', this)"><div style="font-size:14px">🦅</div><div>CSK</div></div>
+      </div>
+      <div class="center-grid">
+        <div class="row-1x3"><div class="cell bg-blue" onclick="placeBet('mi_top', this)">🛡️</div><div class="cell bg-blue" onclick="placeBet('mi_top', this)">🛡️</div><div class="cell bg-blue" onclick="placeBet('mi_top', this)">🛡️</div><div class="cell bg-gold" onclick="placeBet('pay_all', this)" style="font-size:12px;color:#fff">PAY ALL</div><div class="cell bg-blue" onclick="placeBet('lsg_top', this)">🦅</div><div class="cell bg-blue" onclick="placeBet('lsg_top', this)">🦅</div><div class="cell bg-blue" onclick="placeBet('lsg_top', this)">🦅</div></div>
+        <div class="row-2x"><div class="cell bg-red" onclick="placeBet('mi_x10', this)"><div>MI</div><div class="mult">X 10</div></div><div class="cell bg-red" onclick="placeBet('lsg_x8', this)"><div>LSG</div><div class="mult">X 8</div></div></div>
+        <div class="row-2x"><div class="cell bg-red" onclick="placeBet('kxip_x8', this)"><div>KXIP</div><div class="mult">X 8</div></div><div class="cell bg-red" onclick="placeBet('srh_x6', this)"><div>SRH</div><div class="mult">X 6</div></div></div>
+        <div class="row-1x1"><div class="cell bg-red" onclick="placeBet('red', this)"><div style="font-size:24px;color:#ff8a80">RED</div><div class="mult">X 2</div></div></div>
+        <div class="row-battle"><div class="cell bg-gold" onclick="placeBet('battle', this)"><div style="font-size:12px;color:#000;text-align:right;width:100%;padding-right:10px">CRICKET<br>BATTLE</div><div style="font-size:10px;color:#000;text-align:right;width:100%;padding-right:10px">MAX <span style="font-size:16px">X 100</span></div></div></div>
+        <div class="row-2x"><div class="cell bg-blue" onclick="placeBet('kkr_x8', this)"><div>KKR</div><div class="mult">X 8</div></div><div class="cell bg-blue" onclick="placeBet('dc_x6', this)"><div>DC</div><div class="mult">X 6</div></div></div>
+        <div class="row-2x"><div class="cell bg-blue" onclick="placeBet('csk_x10', this)"><div>CSK</div><div class="mult">X 10</div></div><div class="cell bg-blue" onclick="placeBet('gt_x8', this)"><div>GT</div><div class="mult">X 8</div></div></div>
+        <div class="row-1x1"><div class="cell bg-blue" onclick="placeBet('blue', this)"><div style="font-size:24px;color:#82b1ff">BLUE</div><div class="mult">X 2</div></div></div>
+        <div class="row-1x3"><div class="cell bg-blue" onclick="placeBet('csk_top', this)">🦅</div><div class="cell bg-blue" onclick="placeBet('csk_top', this)">🦅</div><div class="cell bg-blue" onclick="placeBet('csk_top', this)">🦅</div><div class="cell bg-blue" onclick="placeBet('take_all', this)" style="font-size:10px">TAKE ALL</div><div class="cell bg-blue" onclick="placeBet('gt_top', this)">🏆</div><div class="cell bg-blue" onclick="placeBet('gt_top', this)">🏆</div><div class="cell bg-blue" onclick="placeBet('gt_top', this)">🏆</div></div>
+      </div>
+      <div class="col-right"><div class="cell bg-blue" onclick="placeBet('srh_side', this)"><div style="font-size:14px">🔥</div><div>SRH</div></div><div class="cell bg-blue" onclick="placeBet('dc_side', this)"><div style="font-size:14px">👑</div><div>DC</div></div><div class="cell bg-blue" onclick="placeBet('gt_side', this)"><div style="font-size:14px">🏆</div><div>GT</div></div></div>
+    </div>
+    <div class="ball-overlay" id="spinBall"></div>
+  </div>
+  <div class="bottom-bar">
+    <div class="bar-top"><span>Balance ₹<span id="balUI">1000</span></span><span>Total Bet ₹<span id="myBetUI">0</span></span></div>
+    <div class="bar-controls"><div class="action-btn" onclick="doubleBet()">×2</div><div class="action-btn" onclick="againBet()">🔄</div><div class="chip-selector" id="chipBtn" onclick="changeChip()"><span id="chipUI">10</span></div><div class="action-btn" onclick="undoBet()">↩️</div><div class="action-btn" onclick="clearBet()" style="color:#ff5252">❌</div></div>
+  </div>
+  <div class="result-overlay" id="resultOverlay"><div class="result-text" id="resultText">WIN!</div><div class="result-amount" id="resultAmt">+0</div></div>
+</div>
+<script src="js/game-wallet.js"></script>
+<script>
+const CHIPS = [10, 50, 100, 500];
+const ZONE_MULTS = {'mi_side':2, 'kxip_side':2, 'kkr_side':2, 'csk_side':2, 'srh_side':2, 'dc_side':2, 'gt_side':2, 'mi_top':3, 'lsg_top':3, 'csk_top':3, 'gt_top':3, 'mi_x10':10, 'lsg_x8':8, 'kxip_x8':8, 'srh_x6':6, 'kkr_x8':8, 'dc_x6':6, 'csk_x10':10, 'gt_x8':8, 'red':2, 'blue':2, 'battle':100, 'pay_all':0, 'take_all':0};
+let balance = window.loadGameWalletBalance(1000), currentChipIdx = 0, userBets = {}, lastBet = {}, isRolling = false, countdown = 0, timerInterval;
+function updateUI() {
+  window.syncGameWalletBalance(balance);
+  window.syncGameWalletBalance(balance); document.getElementById('balUI').textContent = balance.toLocaleString(); document.getElementById('chipUI').textContent = CHIPS[currentChipIdx]; document.querySelectorAll('.chip-stack').forEach(el => el.remove()); for(const [zone, amt] of Object.entries(userBets)) { const el = document.querySelector(`[onclick="placeBet('${zone}', this)"]`); if(el) { const chip = document.createElement('div'); chip.className = `chip-stack c${amt>=500?500:amt>=100?100:amt>=50?50:10}`; chip.textContent = amt; el.style.position='relative'; el.appendChild(chip); } } }
+function changeChip() { currentChipIdx = (currentChipIdx + 1) % CHIPS.length; updateUI(); beep(600, 0.05); }
+function placeBet(zone, el) { if(isRolling) return; const amt = CHIPS[currentChipIdx]; if(balance < amt) { beep(200, 0.1); return; } balance -= amt; userBets[zone] = (userBets[zone] || 0) + amt; updateUI(); beep(800, 0.05); el.style.transform = 'scale(0.9)'; setTimeout(()=>el.style.transform = 'scale(1)', 100); if(!isRolling && !timerInterval) startTimer(); }
+function clearBet() { if(isRolling) return; balance += Object.values(userBets).reduce((a,b)=>a+b,0); userBets = {}; updateUI(); }
+function undoBet() { if(isRolling) return; const zones = Object.keys(userBets); if(!zones.length) return; const l = zones[zones.length-1]; balance += userBets[l]; delete userBets[l]; updateUI(); }
+function doubleBet() { if(isRolling) return; const t = Object.values(userBets).reduce((a,b)=>a+b,0); if(t === 0 || balance < t) return; balance -= t; for(const z in userBets) userBets[z] *= 2; updateUI(); }
+function againBet() { if(isRolling) return; clearBet(); const t = Object.values(lastBet).reduce((a,b)=>a+b,0); if(t === 0 || balance < t) return; balance -= t; userBets = { ...lastBet }; updateUI(); }
+function startTimer() { if(timerInterval) clearInterval(timerInterval); countdown = 10; timerInterval = setInterval(() => { countdown -= 0.1; if(countdown <= 0) { clearInterval(timerInterval); timerInterval = null; document.getElementById('histTimer').textContent = '00'; spinBall(); } else { document.getElementById('histTimer').textContent = Math.ceil(countdown).toString().padStart(2, '0'); } }, 100); }
+function spinBall() { isRolling = true; lastBet = { ...userBets }; const ball = document.getElementById('spinBall'); ball.classList.add('spinning'); ball.style.display = 'block'; const boardRect = document.getElementById('gameBoard').getBoundingClientRect(); let ticks = 0; const maxTicks = 30; const moveInterval = setInterval(() => { const randomX = Math.random() * (boardRect.width - 40) + 20; const randomY = Math.random() * (boardRect.height - 40) + 20; ball.style.left = randomX + 'px'; ball.style.top = randomY + 'px'; beep(600 + Math.random()*200, 0.02); ticks++; if(ticks >= maxTicks) { clearInterval(moveInterval); ball.classList.remove('spinning'); const zones = Object.keys(ZONE_MULTS); const winnerZone = zones[Math.floor(Math.random() * zones.length)]; const winEl = document.querySelector(`[onclick="placeBet('${winnerZone}', this)"]`); if(winEl) { const elRect = winEl.getBoundingClientRect(); ball.style.left = (elRect.left - boardRect.left + elRect.width/2 - 12) + 'px'; ball.style.top = (elRect.top - boardRect.top + elRect.height/2 - 12) + 'px'; } setTimeout(() => { ball.style.display = 'none'; evaluate(winnerZone); }, 500); } }, 100); }
+function evaluate(winnerZone) { isRolling = false; let totalWin = 0, totalBet = Object.values(userBets).reduce((a,b)=>a+b,0); for(const [zone, amt] of Object.entries(userBets)) { let win = false, mult = 1; if(winnerZone === 'pay_all') { win = true; mult = 3; } else if(winnerZone === 'take_all') { } else if(winnerZone === zone) { win = true; mult = ZONE_MULTS[zone]; } if(win) totalWin += amt * mult; } const histBar = document.getElementById('historyBar'); const hIcon = document.createElement('div'); hIcon.className = 'hist-icon'; hIcon.textContent = winnerZone.includes('red') ? '🔴' : winnerZone.includes('blue') ? '🔵' : winnerZone === 'battle' ? '🏏' : '🏆'; histBar.insertBefore(hIcon, histBar.firstChild); if(histBar.children.length > 8) histBar.removeChild(histBar.lastChild); if(totalWin > 0) { balance += totalWin; showResult('WIN!', totalWin - totalBet); playWinSound(); } else if(totalBet > 0) { showResult('LOSE', -totalBet); beep(200, 0.3); } if(totalBet > 0) window.recordGameRound(totalWin - totalBet); userBets = {}; updateUI(); setTimeout(() => { document.getElementById('resultOverlay').classList.remove('show'); startTimer(); }, 3000); }
+function showResult(type, amount) { document.getElementById('resultText').textContent = type; document.getElementById('resultText').style.color = type==='WIN!'?'#4caf50':'#f44336'; document.getElementById('resultAmt').textContent = (amount>0?'+':'')+amount; document.getElementById('resultOverlay').classList.add('show'); }
+let audioCtx; function beep(freq, dur, type='sine', vol=0.1) { try { if(!audioCtx) audioCtx = new (window.AudioContext||window.webkitAudioContext)(); const o = audioCtx.createOscillator(), g = audioCtx.createGain(); o.type=type; o.frequency.value=freq; g.gain.setValueAtTime(vol, audioCtx.currentTime); g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime+dur); o.connect(g); g.connect(audioCtx.destination); o.start(); o.stop(audioCtx.currentTime+dur); } catch(e) {} }
+function playWinSound() { [523, 659, 784, 1047].forEach((f,i)=>setTimeout(()=>beep(f,0.2,'triangle',0.1), i*100)); }
+window.onload = () => { updateUI(); startTimer(); };
+</script>
+  <script src="js/live-users.js"></script>
+</body>
+</html>

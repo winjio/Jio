@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Baccarat - Jiowin Style</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;user-select:none;font-family:'Segoe UI',sans-serif}
+body{background:#0f0714;color:#fff;min-height:100vh;display:flex;justify-content:center;overflow:hidden}
+.app{width:100%;max-width:600px;height:100vh;display:flex;flex-direction:column;background:#0a0510;position:relative;overflow:hidden}
+.top-bar{background:#1e1e1e;display:flex;justify-content:space-between;padding:8px 12px;font-size:12px;color:#aaa;z-index:50}
+.brand{font-weight:900;font-size:16px;color:#fff;}
+.brand span{background:#4caf50;color:#000;padding:1px 4px;border-radius:4px;font-size:10px}
+.game-container{flex:1;display:flex;position:relative;overflow:hidden}
+.left-sidebar{width:60px;display:flex;flex-direction:column;align-items:center;padding:10px 0;background:linear-gradient(90deg, rgba(0,0,0,0.8), transparent);z-index:20}
+.bal-info{display:flex;flex-direction:column;align-items:center;font-size:9px;color:#aaa;margin-bottom:15px}
+.bal-info span{color:#ffd700;font-weight:bold;font-size:11px}
+.chip-list{display:flex;flex-direction:column;gap:8px;margin-bottom:15px}
+.chip-btn{width:44px;height:44px;border-radius:50%;border:2px dashed #fff;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:12px;cursor:pointer;position:relative}
+.chip-btn.active{border:3px solid #ffd700;box-shadow:0 0 15px #ffd700}
+.chip-10{background:#fff;color:#000}.chip-20{background:#4fc3f7;color:#fff}.chip-50{background:#8d6e63;color:#fff}.chip-100{background:#ffca28;color:#000}.chip-250{background:#e53935;color:#fff}
+.action-btns{display:flex;flex-direction:column;gap:8px}
+.action-btn{width:44px;height:44px;background:#333;border:1px solid #555;border-radius:8px;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:8px;color:#ccc;cursor:pointer}
+.table-area{flex:1;position:relative;padding:10px;display:flex;flex-direction:column}
+.table-felt{flex:1;background:#2e7d32;border:2px solid #ffd700;border-radius:12px;position:relative;display:grid;grid-template-columns:1.2fr 1fr;grid-template-rows: 1fr 1.2fr 1fr;gap:4px;padding:4px}
+.zone{border-radius:6px;position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;border:1px solid rgba(255,255,255,0.2);background:rgba(0,0,0,0.1);padding:4px}
+.zone-text-main{font-size:20px;font-weight:900;letter-spacing:1px}
+.zone-text-sub{font-size:9px;color:#e0e0e0}
+.zone-odds{position:absolute;top:5px;left:5px;font-size:10px;font-weight:bold;color:#fff;background:rgba(0,0,0,0.4);padding:1px 4px;border-radius:4px}
+.zone-amt{position:absolute;top:5px;right:5px;font-size:10px;font-weight:bold;color:#fff}
+.player-zone{border-color:#2196f3}.player-zone .zone-text-main{color:#64b5f6}
+.banker-zone{border-color:#f44336}.banker-zone .zone-text-main{color:#e57373}
+.tie-zone{border-color:#4caf50}.tie-zone .zone-text-main{color:#81c784}
+.lucky-zone{border-color:#ff9800}.lucky-zone .zone-text-main{color:#ffb74d}
+.cards-display{position:absolute;top:15%;left:0;right:0;display:flex;justify-content:space-around;z-index:30;pointer-events:none}
+.hand{display:flex;flex-direction:column;align-items:center;gap:5px}
+.hand-cards{display:flex;gap:2px;min-height:70px}
+.card{width:40px;height:60px;background:#fff;border-radius:4px;display:flex;flex-direction:column;justify-content:space-between;padding:2px;color:#000;font-weight:bold;font-size:12px;box-shadow:0 4px 8px rgba(0,0,0,0.5)}
+.card.red{color:#d32f2f}
+.card .suit{font-size:18px;align-self:center}
+.hand-score{background:rgba(0,0,0,0.6);color:#fff;padding:2px 8px;border-radius:10px;font-weight:bold;font-size:12px;display:none}
+.hand-score.show{display:block}
+.right-sidebar{width:80px;display:flex;flex-direction:column;align-items:center;padding:10px 0;background:linear-gradient(-90deg, rgba(0,0,0,0.8), transparent);z-index:20}
+.logo-text{font-size:18px;font-weight:900;color:#ffd700;transform:rotate(-90deg);margin-top:40px}
+.dealer-img{width:90px;height:140px;position:absolute;right:-10px;bottom:60px;z-index:15}
+.dealer-img img{width:100%;height:100%;object-fit:cover;border-radius:10px;border:2px solid #6a1b9a;mask-image:linear-gradient(to bottom, black 70%, transparent 100%)}
+.timer-circle{position:absolute;right:10px;bottom:20px;width:40px;height:40px;border-radius:50%;background:conic-gradient(#ff5722 0%, #333 0%);display:flex;align-items:center;justify-content:center;z-index:20}
+.timer-inner{width:34px;height:34px;background:#111;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:bold;color:#ff5722}
+.chip-stack{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:20px;height:20px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:bold;color:#fff;border:2px dashed #fff;z-index:10}
+.bottom-bar{background:#1e1e1e;padding:5px 10px;display:flex;justify-content:space-between;font-size:11px;color:#aaa;z-index:50}
+.bottom-bar span{color:#fff;font-weight:bold}
+.result-overlay{position:absolute;inset:0;background:rgba(0,0,0,0.85);z-index:100;display:none;flex-direction:column;align-items:center;justify-content:center}
+.result-overlay.show{display:flex}
+.result-text{font-size:40px;font-weight:900;margin-bottom:10px}
+.result-amount{font-size:28px;color:#ffd700;font-weight:bold}
+</style>
+  <link rel="stylesheet" href="css/live-users.css">
+</head>
+<body>
+<div class="app">
+  <div class="top-bar"><div>☰ 🔔</div><div class="brand">Jiowin</div></div>
+  <div class="game-container">
+    <div class="left-sidebar">
+      <div class="bal-info">Balance<br><span id="balUI">1000</span></div>
+      <div class="chip-list">
+        <div class="chip-btn chip-10 active" onclick="selectChip(10)">10</div><div class="chip-btn chip-20" onclick="selectChip(20)">20</div>
+        <div class="chip-btn chip-50" onclick="selectChip(50)">50</div><div class="chip-btn chip-100" onclick="selectChip(100)">100</div>
+        <div class="chip-btn chip-250" onclick="selectChip(250)">250</div>
+      </div>
+      <div class="action-btns"><div class="action-btn" onclick="rebet()">↩️</div><div class="action-btn" onclick="clearBet()">❌</div></div>
+    </div>
+    <div class="table-area">
+      <div class="table-felt">
+        <div class="zone player-zone" onclick="placeBet('player', this)"><div class="zone-odds">1:1</div><div class="zone-amt" id="amt-player">₹0</div><div class="zone-text-main">PLAYER</div></div>
+        <div style="display:flex; flex-direction:column; gap:4px;">
+          <div class="zone player-zone" style="flex:1" onclick="placeBet('player_pair', this)"><div class="zone-odds">1:11</div><div class="zone-amt" id="amt-player_pair">₹0</div><div class="zone-text-sub">PLAYER PAIR</div></div>
+          <div class="zone player-zone" style="flex:1" onclick="placeBet('big', this)"><div class="zone-odds">1:0.5</div><div class="zone-amt" id="amt-big">₹0</div><div class="zone-text-main">BIG</div></div>
+        </div>
+        <div class="zone tie-zone" onclick="placeBet('tie', this)"><div class="zone-odds">1:8</div><div class="zone-amt" id="amt-tie">₹0</div><div class="zone-text-main">TIE</div></div>
+        <div class="zone lucky-zone" onclick="placeBet('lucky6', this)"><div class="zone-odds">1:12/20</div><div class="zone-amt" id="amt-lucky6">₹0</div><div class="zone-text-main">LUCKY 6</div></div>
+        <div class="zone banker-zone" onclick="placeBet('banker', this)"><div class="zone-odds">1:1</div><div class="zone-amt" id="amt-banker">₹0</div><div class="zone-text-main">BANKER</div><div class="zone-text-sub" style="color:#ffab91">WINS ON 6 PAYS 50%</div></div>
+        <div style="display:flex; flex-direction:column; gap:4px;">
+          <div class="zone banker-zone" style="flex:1" onclick="placeBet('small', this)"><div class="zone-odds">1:1.5</div><div class="zone-amt" id="amt-small">₹0</div><div class="zone-text-main">SMALL</div></div>
+          <div class="zone banker-zone" style="flex:1" onclick="placeBet('banker_pair', this)"><div class="zone-odds">1:11</div><div class="zone-amt" id="amt-banker_pair">₹0</div><div class="zone-text-sub">BANKER PAIR</div></div>
+        </div>
+        <div class="cards-display">
+          <div class="hand"><div class="hand-cards" id="playerCards"></div><div class="hand-score" id="playerScore">0</div></div>
+          <div class="hand"><div class="hand-cards" id="bankerCards"></div><div class="hand-score" id="bankerScore">0</div></div>
+        </div>
+      </div>
+    </div>
+    <div class="right-sidebar">
+      <div class="logo-text">Baccarat</div>
+      <div class="dealer-img"><img src="https://i.pravatar.cc/150?img=47" alt="Dealer"></div>
+      <div class="timer-circle" id="timerCircle"><div class="timer-inner" id="timerText">15</div></div>
+    </div>
+  </div>
+  <div class="bottom-bar"><div>Balance: <span id="botBal">1000</span></div><div>Total Win: <span id="botWin">0</span></div></div>
+  <div class="result-overlay" id="resultOverlay"><div class="result-text" id="resultText">WIN!</div><div class="result-amount" id="resultAmt">+0</div></div>
+</div>
+<script src="js/game-wallet.js"></script>
+<script>
+const CHIPS = [10, 20, 50, 100, 250], SUITS = ['♠', '♥', '♦', '♣'], RANKS = ['A', '2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K'];
+let balance = window.loadGameWalletBalance(1000), currentChip = 10, userBets = {}, isRolling = false, countdown = 15, timerInterval;
+function updateUI() {
+  window.syncGameWalletBalance(balance);
+  window.syncGameWalletBalance(balance);
+  document.getElementById('balUI').textContent = balance.toLocaleString(); document.getElementById('botBal').textContent = balance.toLocaleString();
+  for(const zone of ['player','player_pair','big','tie','lucky6','banker','small','banker_pair']) { const el = document.getElementById(`amt-${zone}`); if(el) el.textContent = '₹' + (userBets[zone] || 0); }
+  document.querySelectorAll('.chip-stack').forEach(el => el.remove());
+  for(const [zone, amt] of Object.entries(userBets)) {
+    const el = document.querySelector(`[onclick="placeBet('${zone}', this)"]`);
+    if(el) { const chip = document.createElement('div'); chip.className = 'chip-stack'; chip.textContent = amt; el.appendChild(chip); }
+  }
+}
+function selectChip(val) { currentChip = val; document.querySelectorAll('.chip-btn').forEach(el => el.classList.remove('active')); document.querySelector(`.chip-${val}`).classList.add('active'); beep(600, 0.05); }
+function placeBet(zone, el) {
+  if(isRolling) return; if(balance < currentChip) { beep(200, 0.1); return; }
+  balance -= currentChip; userBets[zone] = (userBets[zone] || 0) + currentChip; updateUI(); beep(800, 0.05);
+  el.style.transform = 'scale(0.95)'; setTimeout(()=>el.style.transform = 'scale(1)', 100);
+  if(!isRolling && !timerInterval) startTimer();
+}
+function clearBet() { if(isRolling) return; balance += Object.values(userBets).reduce((a,b)=>a+b,0); userBets = {}; updateUI(); }
+function rebet() { if(isRolling) return; clearBet(); }
+function startTimer() {
+  if(timerInterval) clearInterval(timerInterval); countdown = 15;
+  timerInterval = setInterval(() => {
+    countdown -= 0.1;
+    if(countdown <= 0) { clearInterval(timerInterval); timerInterval = null; dealCards(); }
+    else { document.getElementById('timerCircle').style.background = `conic-gradient(#ff5722 ${(countdown/15)*100}%, #333 ${(countdown/15)*100}%)`; document.getElementById('timerText').textContent = Math.ceil(countdown); }
+  }, 100);
+}
+function createDeck() { const deck = []; for(let i=0; i<8; i++) for(const s of SUITS) for(const r of RANKS) deck.push({suit: s, rank: r}); return deck.sort(()=>Math.random()-0.5); }
+function getValue(card) { if(['10', 'J', 'Q', 'K'].includes(card.rank)) return 0; if(card.rank === 'A') return 1; return parseInt(card.rank); }
+function getScore(cards) { return cards.reduce((a, c) => a + getValue(c), 0) % 10; }
+function getCardHTML(card) { const isRed = card.suit === '♥' || card.suit === '♦'; return `<div style="color:${isRed?'#d32f2f':'#000'}">${card.rank}</div><div class="suit" style="color:${isRed?'#d32f2f':'#000'}">${card.suit}</div>`; }
+function renderCards(playerCards, bankerCards) {
+  document.getElementById('playerCards').innerHTML = playerCards.map(c => `<div class="card ${c.suit==='♥'||c.suit==='♦'?'red':''}">${getCardHTML(c)}</div>`).join('');
+  document.getElementById('bankerCards').innerHTML = bankerCards.map(c => `<div class="card ${c.suit==='♥'||c.suit==='♦'?'red':''}">${getCardHTML(c)}</div>`).join('');
+  document.getElementById('playerScore').textContent = getScore(playerCards); document.getElementById('bankerScore').textContent = getScore(bankerCards);
+  document.getElementById('playerScore').classList.add('show'); document.getElementById('bankerScore').classList.add('show');
+}
+function dealCards() {
+  isRolling = true; document.getElementById('playerCards').innerHTML = ''; document.getElementById('bankerCards').innerHTML = '';
+  document.getElementById('playerScore').classList.remove('show'); document.getElementById('bankerScore').classList.remove('show');
+  const deck = createDeck(), pCards = [deck.pop(), deck.pop()], bCards = [deck.pop(), deck.pop()];
+  let pScore = getScore(pCards), bScore = getScore(bCards);
+  setTimeout(() => {
+    renderCards([pCards[0]], []); beep(400, 0.1);
+    setTimeout(() => {
+      renderCards(pCards, [bCards[0]]); beep(400, 0.1);
+      setTimeout(() => {
+        renderCards(pCards, bCards); beep(400, 0.1);
+        if(pScore >= 8 || bScore >= 8) setTimeout(() => finishGame(pCards, bCards, pScore, bScore), 1000);
+        else {
+          setTimeout(() => {
+            let p3 = null; if(pScore <= 5) { p3 = deck.pop(); pCards.push(p3); pScore = getScore(pCards); renderCards(pCards, bCards); beep(500, 0.1); }
+            setTimeout(() => {
+              let b3 = null; if(p3 === null) { if(bScore <= 5) b3 = deck.pop(); }
+              else { const p3v = getValue(p3); if(bScore <= 2) b3 = deck.pop(); else if(bScore === 3 && p3v !== 8) b3 = deck.pop(); else if(bScore === 4 && p3v >= 2 && p3v <= 7) b3 = deck.pop(); else if(bScore === 5 && p3v >= 4 && p3v <= 7) b3 = deck.pop(); else if(bScore === 6 && (p3v === 6 || p3v === 7)) b3 = deck.pop(); }
+              if(b3) { bCards.push(b3); bScore = getScore(bCards); renderCards(pCards, bCards); beep(500, 0.1); }
+              setTimeout(() => finishGame(pCards, bCards, pScore, bScore), 1000);
+            }, 800);
+          }, 800);
+        }
+      }, 600);
+    }, 600);
+  }, 500);
+}
+function finishGame(pCards, bCards, pScore, bScore) {
+  isRolling = false; const winner = pScore > bScore ? 'player' : bScore > pScore ? 'banker' : 'tie';
+  const isBig = Math.abs(pScore - bScore) >= 5, isSmall = Math.abs(pScore - bScore) >= 1 && Math.abs(pScore - bScore) <= 4;
+  const isPlayerPair = getValue(pCards[0]) === getValue(pCards[1]); const isBankerPair = getValue(bCards[0]) === getValue(bCards[1]);
+  const isLucky6 = (winner === 'banker' && bScore === 6); const lucky6Mult = bCards.length === 2 ? 12 : 20;
+  let totalWin = 0, totalBet = Object.values(userBets).reduce((a,b)=>a+b,0);
+  for(const [zone, amt] of Object.entries(userBets)) {
+    let win = false, mult = 1;
+    if(zone === 'player' && winner === 'player') { win = true; mult = 2; }
+    else if(zone === 'banker' && winner === 'banker') { win = true; mult = bScore === 6 ? 1.5 : 2; }
+    else if(zone === 'tie' && winner === 'tie') { win = true; mult = 9; }
+    else if(zone === 'player_pair' && isPlayerPair) { win = true; mult = 12; }
+    else if(zone === 'banker_pair' && isBankerPair) { win = true; mult = 12; }
+    else if(zone === 'big' && pCards.length + bCards.length >= 5) { win = true; mult = 1.5; }
+    else if(zone === 'small' && pCards.length + bCards.length === 4) { win = true; mult = 2.5; }
+    else if(zone === 'lucky6' && isLucky6) { win = true; mult = 1 + lucky6Mult; }
+    if(win) totalWin += amt * mult;
+  }
+  const resOverlay = document.getElementById('resultOverlay'), resText = document.getElementById('resultText'), resAmt = document.getElementById('resultAmt'), botWin = document.getElementById('botWin');
+  if(totalBet > 0) {
+    if(totalWin > 0) { balance += totalWin; resText.textContent = `${winner.toUpperCase()} WINS!`; resText.style.color = '#4caf50'; resAmt.textContent = '+' + (totalWin - totalBet); botWin.textContent = '+' + (totalWin - totalBet); playWinSound(); }
+    else { resText.textContent = 'LOSE'; resText.style.color = '#f44336'; resAmt.textContent = -totalBet; botWin.textContent = -totalBet; beep(200, 0.3); }
+    resOverlay.classList.add('show');
+  }
+  if (totalBet > 0) window.recordGameRound(totalWin - totalBet);
+  userBets = {}; updateUI();
+  setTimeout(() => { resOverlay.classList.remove('show'); startTimer(); }, 4000);
+}
+let audioCtx; function beep(freq, dur, type='sine', vol=0.1) { try { if(!audioCtx) audioCtx = new (window.AudioContext||window.webkitAudioContext)(); const o = audioCtx.createOscillator(), g = audioCtx.createGain(); o.type=type; o.frequency.value=freq; g.gain.setValueAtTime(vol, audioCtx.currentTime); g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime+dur); o.connect(g); g.connect(audioCtx.destination); o.start(); o.stop(audioCtx.currentTime+dur); } catch(e) {} }
+function playWinSound() { [523, 659, 784, 1047].forEach((f,i)=>setTimeout(()=>beep(f,0.2,'triangle',0.1), i*100)); }
+window.onload = () => { updateUI(); startTimer(); };
+</script>
+  <script src="js/live-users.js"></script>
+</body>
+</html>

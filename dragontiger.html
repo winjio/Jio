@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Dragon & Tiger - Jiowin</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;user-select:none;font-family:'Segoe UI',sans-serif}
+body{background:#111;color:#fff;min-height:100vh;display:flex;justify-content:center;overflow:hidden}
+.app{width:100%;max-width:500px;height:100vh;display:flex;flex-direction:column;background:#0a0a0a;position:relative}
+.top-bar{background:#1e1e1e;display:flex;justify-content:space-between;padding:8px 12px;font-size:12px;color:#aaa;border-bottom:1px solid #333;z-index:50}
+.brand{font-weight:900;font-size:16px;color:#fff;letter-spacing:1px;display:flex;align-items:center;gap:5px}
+.brand span{background:#4caf50;color:#000;padding:1px 4px;border-radius:4px;font-size:10px}
+.game-area{flex:1;position:relative;display:flex;flex-direction:column;background:#2e7d32;overflow:hidden}
+.game-area::before{content:'';position:absolute;top:0;left:0;right:0;bottom:0;background:linear-gradient(90deg,#2e7d32 50%,#c62828 50%);z-index:1}
+.table-overlay{position:absolute;inset:0;background-image:url('data:image/svg+xml;utf8,<svg width="100" height="100" xmlns="http://www.w3.org/2000/svg"><path d="M10 50 Q 50 10 90 50 T 10 50" fill="none" stroke="rgba(0,0,0,0.05)" stroke-width="2"/></svg>');z-index:2;pointer-events:none}
+.side-players{position:absolute;left:5px;top:10px;display:flex;flex-direction:column;gap:15px;z-index:10}
+.player{display:flex;align-items:center;gap:6px}
+.player-avatar{width:40px;height:40px;border-radius:50%;border:2px solid #ffd700;overflow:hidden;background:#333;position:relative}
+.player-avatar img{width:100%;height:100%;object-fit:cover}
+.player-vip{position:absolute;bottom:-5px;right:-5px;background:#ffd700;color:#000;font-size:8px;font-weight:bold;padding:1px 3px;border-radius:4px;border:1px solid #fff;z-index:2}
+.player-info{display:flex;flex-direction:column;text-shadow:1px 1px 2px #000}
+.player-info .coins{font-size:10px;color:#ffd700;font-weight:bold}
+.player-info .bet{background:#fff;color:#000;font-size:9px;padding:1px 4px;border-radius:8px;font-weight:bold;margin-top:2px;text-align:center;width:max-content}
+.cards-container{position:absolute;top:15%;left:50%;transform:translateX(-50%);display:flex;gap:20px;z-index:20}
+.card-slot{width:70px;height:100px;border-radius:6px;border:2px solid #fff;box-shadow:0 5px 15px rgba(0,0,0,0.5);position:relative;background:#fff}
+.card-slot .card-back{width:100%;height:100%;background:repeating-linear-gradient(45deg,#1565c0 0 10px,#0d47a1 10px 20px);border-radius:4px}
+.card-slot.flipped .card-back{display:none}
+.card-face{position:absolute;inset:0;display:flex;flex-direction:column;justify-content:space-between;padding:5px;font-weight:bold;font-size:20px;color:#000;background:#fff;opacity:0;transition:opacity 0.3s}
+.card-slot.flipped .card-face{opacity:1}
+.card-face.red{color:#d32f2f}
+.card-face .suit{font-size:30px;align-self:center;line-height:1}
+.history-strip{position:absolute;top:42%;left:50%;transform:translateX(-50%);display:flex;gap:2px;z-index:20;background:rgba(0,0,0,0.6);padding:2px;border-radius:4px}
+.hist-item{width:18px;height:22px;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:bold;color:#fff;border-radius:2px}
+.hist-D{background:#c62828}
+.hist-T{background:#2e7d32}
+.hist-X{background:#2196f3}
+.timer-circle{position:absolute;top:10%;right:15px;width:45px;height:45px;border-radius:50%;background:conic-gradient(#ffd700 0%, #333 0%);display:flex;align-items:center;justify-content:center;z-index:20}
+.timer-inner{width:39px;height:39px;background:#111;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:bold;color:#ffd700}
+.table-felt{position:absolute;inset:0;z-index:5;padding-top:55%}
+.zone-title{position:absolute;top:45%;font-size:30px;font-weight:900;color:rgba(255,255,255,0.15);text-transform:uppercase}
+.zone-title.dragon{left:10%}
+.zone-title.tiger{right:10%}
+.main-bets{display:flex;height:60px}
+.main-bets .zone{flex:1;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:18px;text-shadow:1px 1px 2px #000;cursor:pointer}
+.main-bets .zone.dragon{background:rgba(76,175,80,0.8);border:1px solid #81c784}
+.main-bets .zone.tiger{background:rgba(198,40,40,0.8);border:1px solid #e57373}
+.sub-bets{display:grid;grid-template-columns:1fr 1fr 1.2fr 1fr 1fr;height:45px;gap:2px;padding:2px 0;background:rgba(0,0,0,0.2)}
+.sub-bets .zone{display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:12px;font-weight:bold;border:1px solid rgba(255,255,255,0.3);cursor:pointer}
+.sub-bets .zone.d-suit{background:rgba(76,175,80,0.6)}
+.sub-bets .zone.t-suit{background:rgba(198,40,40,0.6)}
+.sub-bets .zone.tie{background:rgba(33,150,243,0.8);font-size:16px}
+.points-section{background:rgba(0,0,0,0.4);padding:4px}
+.points-title{text-align:center;font-size:10px;color:#ffd700;margin-bottom:2px}
+.points-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:2px}
+.points-grid .zone{background:rgba(33,150,243,0.6);border:1px solid rgba(255,255,255,0.2);padding:6px 0;display:flex;flex-direction:column;align-items:center;font-size:14px;font-weight:bold;cursor:pointer}
+.points-grid .zone .odds{font-size:10px;color:#e0e0e0;font-weight:normal}
+.chip-stack{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:bold;color:#fff;border:2px dashed #fff;z-index:10}
+.chip-stack.c10{background:#888}.chip-stack.c50{background:#e53935}.chip-stack.c100{background:#43a047}
+.sub-header{background:#3e2723;display:flex;justify-content:space-between;padding:5px 10px;font-size:11px;color:#d4c9b8;z-index:10}
+.bottom-bar{background:#1e1e1e;padding:8px 10px;display:flex;align-items:center;justify-content:space-between;z-index:10}
+.user-profile{display:flex;align-items:center;gap:8px}
+.user-avatar{width:40px;height:40px;border-radius:50%;border:2px solid #ffd700;overflow:hidden}
+.user-avatar img{width:100%;height:100%}
+.user-info .bal{font-size:12px;color:#ffd700;font-weight:bold}
+.controls{display:flex;gap:5px;align-items:center}
+.action-btn{width:40px;height:40px;border-radius:50%;background:rgba(255,255,255,0.1);display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:9px;cursor:pointer;color:#ccc}
+.chip-selector{width:48px;height:48px;border-radius:50%;background:#fff;border:3px solid #4caf50;display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:bold;color:#000;cursor:pointer}
+.win-overlay{position:absolute;inset:0;background:rgba(0,0,0,0.7);z-index:100;display:none;flex-direction:column;align-items:center;justify-content:center}
+.win-overlay.show{display:flex}
+.win-text{font-size:40px;font-weight:900;color:#ffd700;text-shadow:0 0 20px #ffd700}
+.win-amt{font-size:24px;color:#fff;margin-top:10px}
+</style>
+  <link rel="stylesheet" href="css/live-users.css">
+</head>
+<body>
+<div class="app">
+  <div class="top-bar"><div>☰ 🔔</div><div class="brand">Jiowin</div></div>
+  <div class="game-area">
+    <div class="table-overlay"></div>
+    <div class="side-players">
+      <div class="player"><div class="player-avatar"><img src="https://i.pravatar.cc/100?img=5"><div class="player-vip">883</div></div><div class="player-info"><span class="coins">🪙 8,462.79</span></div></div>
+      <div class="player"><div class="player-avatar"><img src="https://i.pravatar.cc/100?img=12"><div class="player-vip">1109</div></div><div class="player-info"><span class="coins">🪙 9,999.06</span><span class="bet">30</span></div></div>
+    </div>
+    <div class="cards-container">
+      <div class="card-slot" id="cardDragon"><div class="card-back"></div><div class="card-face" id="faceDragon"></div></div>
+      <div class="card-slot" id="cardTiger"><div class="card-back"></div><div class="card-face" id="faceTiger"></div></div>
+    </div>
+    <div class="history-strip" id="historyStrip"></div>
+    <div class="timer-circle" id="timerCircle"><div class="timer-inner" id="timerText">15</div></div>
+    <div class="table-felt">
+      <div class="zone-title dragon">DRAGON</div><div class="zone-title tiger">TIGER</div>
+      <div class="main-bets">
+        <div class="zone dragon" onclick="placeBet('dragon', this)">DRAGON<br><span style="font-size:12px">1:1</span></div>
+        <div class="zone tiger" onclick="placeBet('tiger', this)">TIGER<br><span style="font-size:12px">1:1</span></div>
+      </div>
+      <div class="sub-bets">
+        <div class="zone d-suit" onclick="placeBet('d_spade', this)">♠♣ 1:0.8</div><div class="zone d-suit" onclick="placeBet('d_heart', this)">♥♦ 1:0.8</div>
+        <div class="zone tie" onclick="placeBet('tie', this)">TIE<br><span style="font-size:12px">1:8</span></div>
+        <div class="zone t-suit" onclick="placeBet('t_spade', this)">♠♣ 1:0.8</div><div class="zone t-suit" onclick="placeBet('t_heart', this)">♥♦ 1:0.8</div>
+      </div>
+      <div class="points-section">
+        <div class="points-title">Points = Dragon + Tiger</div>
+        <div class="points-grid">
+          <div class="zone" onclick="placeBet('p2_26', this)">2, 26 <span class="odds">1:78</span></div>
+          <div class="zone" onclick="placeBet('p3_6', this)">3-6 <span class="odds">1:10</span></div>
+          <div class="zone" onclick="placeBet('p7_11', this)">7-11 <span class="odds">1:2.8</span></div>
+          <div class="zone" onclick="placeBet('p12_16', this)">12-16 <span class="odds">1:1.6</span></div>
+          <div class="zone" onclick="placeBet('p17_21', this)">17-21 <span class="odds">1:2.8</span></div>
+          <div class="zone" onclick="placeBet('p22_25', this)">22-25 <span class="odds">1:10</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="sub-header"><span>⚙️ 07</span><span>Roadmap ▼</span><span>Multiple Mode</span><span>▲ Min 10 Max 200</span></div>
+  <div class="bottom-bar">
+    <div class="user-profile"><div class="user-avatar"><img src="https://i.pravatar.cc/100?img=11"></div><div class="user-info"><span class="bal">Balance ₹<span id="balUI">1000</span></span></div></div>
+    <div class="controls">
+      <div class="action-btn" onclick="againBet()">🔄</div><div class="action-btn" onclick="doubleBet()">×2</div>
+      <div class="chip-selector" onclick="changeChip()" id="chipBtn"><span id="chipUI">10</span></div>
+      <div class="action-btn" onclick="undoBet()">↩️</div><div class="action-btn" onclick="clearBet()" style="color:#ff5252">❌</div>
+    </div>
+  </div>
+  <div class="win-overlay" id="winOverlay"><div class="win-text" id="winText">WIN!</div><div class="win-amt" id="winAmt">+0</div></div>
+</div>
+<script src="js/game-wallet.js"></script>
+<script>
+const CHIPS = [10, 50, 100, 500], SUITS = ['♠', '♥', '♦', '♣'], RANKS = ['A', '2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K'];
+const ZONE_MULTS = {'dragon':2, 'tiger':2, 'tie':8, 'd_spade':1.8, 'd_heart':1.8, 't_spade':1.8, 't_heart':1.8, 'p2_26':79, 'p3_6':11, 'p7_11':3.8, 'p12_16':2.6, 'p17_21':3.8, 'p22_25':11};
+let balance = window.loadGameWalletBalance(1000), currentChipIdx = 0, userBets = {}, lastBet = {}, isRolling = false, countdown = 15, timerInterval;
+
+function updateUI() {
+  window.syncGameWalletBalance(balance);
+  window.syncGameWalletBalance(balance);
+  document.getElementById('balUI').textContent = balance.toLocaleString();
+  document.getElementById('chipUI').textContent = CHIPS[currentChipIdx];
+  document.querySelectorAll('.chip-stack').forEach(el => el.remove());
+  for(const [zone, amt] of Object.entries(userBets)) {
+    const el = document.querySelector(`[onclick="placeBet('${zone}', this)"]`);
+    if(el) { const chip = document.createElement('div'); chip.className = `chip-stack c${amt>=100?100:amt>=50?50:10}`; chip.textContent = amt; el.style.position='relative'; el.appendChild(chip); }
+  }
+}
+function changeChip() { currentChipIdx = (currentChipIdx + 1) % CHIPS.length; updateUI(); beep(600, 0.05); }
+function placeBet(zone, el) {
+  if(isRolling) return; const amt = CHIPS[currentChipIdx];
+  if(balance < amt) { beep(200, 0.1); return; }
+  balance -= amt; userBets[zone] = (userBets[zone] || 0) + amt; updateUI(); beep(800, 0.05);
+  el.style.transform = 'scale(0.95)'; setTimeout(()=>el.style.transform = 'scale(1)', 100);
+  if(!isRolling && !timerInterval) startTimer();
+}
+function clearBet() { if(isRolling) return; balance += Object.values(userBets).reduce((a,b)=>a+b,0); userBets = {}; updateUI(); }
+function undoBet() { if(isRolling) return; const zones = Object.keys(userBets); if(!zones.length) return; const l = zones[zones.length-1]; balance += userBets[l]; delete userBets[l]; updateUI(); }
+function doubleBet() { if(isRolling) return; const t = Object.values(userBets).reduce((a,b)=>a+b,0); if(t === 0 || balance < t) return; balance -= t; for(const z in userBets) userBets[z] *= 2; updateUI(); }
+function againBet() { if(isRolling) return; clearBet(); const t = Object.values(lastBet).reduce((a,b)=>a+b,0); if(t === 0 || balance < t) return; balance -= t; userBets = { ...lastBet }; updateUI(); }
+
+function startTimer() {
+  if(timerInterval) clearInterval(timerInterval); countdown = 15;
+  timerInterval = setInterval(() => {
+    countdown -= 0.1;
+    if(countdown <= 0) { clearInterval(timerInterval); timerInterval = null; dealCards(); }
+    else {
+      document.getElementById('timerCircle').style.background = `conic-gradient(#ffd700 ${(countdown/15)*100}%, #333 ${(countdown/15)*100}%)`;
+      document.getElementById('timerText').textContent = Math.ceil(countdown);
+    }
+  }, 100);
+}
+
+function dealCards() {
+  isRolling = true; lastBet = { ...userBets };
+  document.getElementById('cardDragon').classList.remove('flipped'); document.getElementById('cardTiger').classList.remove('flipped');
+  const deck = createDeck(), dCard = deck.pop(), tCard = deck.pop();
+  setTimeout(() => {
+    document.getElementById('faceDragon').innerHTML = getCardHTML(dCard); document.getElementById('cardDragon').classList.add('flipped'); beep(600, 0.1);
+    setTimeout(() => {
+      document.getElementById('faceTiger').innerHTML = getCardHTML(tCard); document.getElementById('cardTiger').classList.add('flipped'); beep(700, 0.1);
+      setTimeout(() => evaluate(dCard, tCard), 500);
+    }, 800);
+  }, 800);
+}
+
+function evaluate(dCard, tCard) {
+  isRolling = false;
+  const dVal = dCard.rank === 'A' ? 1 : ['J','Q','K'].includes(dCard.rank) ? 10 : parseInt(dCard.rank);
+  const tVal = tCard.rank === 'A' ? 1 : ['J','Q','K'].includes(tCard.rank) ? 10 : parseInt(tCard.rank);
+  const points = dVal + tVal, winner = dVal > tVal ? 'dragon' : tVal > dVal ? 'tiger' : 'tie';
+  let totalWin = 0, totalBet = 0;
+  
+  for(const [zone, amt] of Object.entries(userBets)) {
+    totalBet += amt; let win = 0;
+    if(zone === 'dragon' && winner === 'dragon') win = amt * 2;
+    else if(zone === 'tiger' && winner === 'tiger') win = amt * 2;
+    else if(zone === 'tie' && winner === 'tie') win = amt * 9;
+    else if(zone === 'd_spade' && winner === 'dragon' && (dCard.suit==='♠'||dCard.suit==='♣')) win = amt * 1.8;
+    else if(zone === 'd_heart' && winner === 'dragon' && (dCard.suit==='♥'||dCard.suit==='♦')) win = amt * 1.8;
+    else if(zone === 't_spade' && winner === 'tiger' && (tCard.suit==='♠'||tCard.suit==='♣')) win = amt * 1.8;
+    else if(zone === 't_heart' && winner === 'tiger' && (tCard.suit==='♥'||tCard.suit==='♦')) win = amt * 1.8;
+    else if(zone === 'p2_26' && (points === 2 || points === 26)) win = amt * 79;
+    else if(zone === 'p3_6' && points >= 3 && points <= 6) win = amt * 11;
+    else if(zone === 'p7_11' && points >= 7 && points <= 11) win = amt * 3.8;
+    else if(zone === 'p12_16' && points >= 12 && points <= 16) win = amt * 2.6;
+    else if(zone === 'p17_21' && points >= 17 && points <= 21) win = amt * 3.8;
+    else if(zone === 'p22_25' && points >= 22 && points <= 25) win = amt * 11;
+    totalWin += win;
+  }
+  
+  if(totalWin > 0) { balance += totalWin; showOverlay('WIN!', totalWin - totalBet, true); playWinSound(); }
+  else if(totalBet > 0) { showOverlay('LOSE', -totalBet, false); beep(200, 0.3); }
+  
+  const hist = document.getElementById('historyStrip'), hIcon = document.createElement('div');
+  hIcon.className = `hist-item hist-${winner === 'dragon' ? 'D' : winner === 'tiger' ? 'T' : 'X'}`; hIcon.textContent = winner === 'dragon' ? 'D' : winner === 'tiger' ? 'T' : 'T';
+  hist.insertBefore(hIcon, hist.firstChild); if(hist.children.length > 8) hist.removeChild(hist.lastChild);
+  
+  if (totalBet > 0) window.recordGameRound(totalWin - totalBet);
+  userBets = {}; updateUI();
+  setTimeout(() => { document.getElementById('winOverlay').classList.remove('show'); startTimer(); }, 3000);
+}
+
+function getCardHTML(card) {
+  const isRed = card.suit === '♥' || card.suit === '♦';
+  return `<div class="corner" style="color:${isRed?'#d32f2f':'#000'}">${card.rank}<br>${card.suit}</div><div class="suit" style="color:${isRed?'#d32f2f':'#000'}">${card.suit}</div>`;
+}
+function createDeck() { const d = []; for(const s of SUITS) for(const r of RANKS) d.push({suit: s, rank: r}); return d.sort(()=>Math.random()-0.5); }
+function showOverlay(text, amt, isWin) {
+  document.getElementById('winText').textContent = text; document.getElementById('winText').style.color = isWin ? '#ffd700' : '#ff5252';
+  document.getElementById('winAmt').textContent = (isWin?'+':'') + amt; document.getElementById('winOverlay').classList.add('show');
+}
+let audioCtx;
+function beep(freq, dur, type='sine', vol=0.1) { try { if(!audioCtx) audioCtx = new (window.AudioContext||window.webkitAudioContext)(); const o = audioCtx.createOscillator(), g = audioCtx.createGain(); o.type=type; o.frequency.value=freq; g.gain.setValueAtTime(vol, audioCtx.currentTime); g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime+dur); o.connect(g); g.connect(audioCtx.destination); o.start(); o.stop(audioCtx.currentTime+dur); } catch(e) {} }
+function playWinSound() { [523, 659, 784, 1047].forEach((f,i)=>setTimeout(()=>beep(f,0.2,'triangle',0.1), i*100)); }
+window.onload = () => { updateUI(); startTimer(); };
+</script>
+  <script src="js/live-users.js"></script>
+</body>
+</html>

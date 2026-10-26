@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Fish-Prawn-Crab - Jiowin</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;user-select:none;font-family:'Segoe UI',sans-serif}
+body{background:#111;color:#fff;min-height:100vh;display:flex;justify-content:center;overflow:hidden}
+.app{width:100%;max-width:500px;height:100vh;display:flex;flex-direction:column;background:#a61e1e;position:relative;overflow:hidden}
+.top-bar{background:#1e1e1e;display:flex;justify-content:space-between;padding:8px 12px;font-size:12px;color:#aaa;z-index:50}
+.brand{font-weight:900;font-size:16px;color:#fff}
+.brand span{background:#4caf50;color:#000;padding:1px 4px;border-radius:4px;font-size:10px}
+.perc-bar{display:flex;justify-content:space-around;background:#7a1010;padding:4px;font-size:10px;color:#ffd700;z-index:50}
+.perc-item{display:flex;align-items:center;gap:2px}
+.perc-icon{font-size:12px;background:#fff;border-radius:2px;padding:1px}
+.main-area{flex:1;position:relative;display:flex;align-items:center;justify-content:center;min-height:220px;overflow:hidden}
+.side-players{position:absolute;left:5px;top:10px;display:flex;flex-direction:column;gap:15px;z-index:10}
+.player{display:flex;align-items:center;gap:4px}
+.player-avatar{width:40px;height:40px;border-radius:50%;border:2px solid #ffd700;overflow:hidden;position:relative}
+.player-avatar img{width:100%;height:100%;object-fit:cover}
+.player-info{font-size:10px;color:#fff;font-weight:bold;text-shadow:1px 1px 2px #000}
+.bowl-container{position:relative;width:220px;height:220px;display:flex;align-items:center;justify-content:center;margin-top:-10px}
+.plate{position:absolute;width:100%;height:100%;background:#fdfbf7;border-radius:50%;box-shadow:inset 0 0 20px rgba(0,0,0,0.1), 0 10px 20px rgba(0,0,0,0.6);border:4px solid #e0d8c8;display:flex;align-items:center;justify-content:center}
+.dice-wrap{display:flex;gap:10px;z-index:5}
+.dice{width:40px;height:40px;background:#fff;border-radius:8px;box-shadow:2px 5px 10px rgba(0,0,0,0.5);display:flex;align-items:center;justify-content:center;font-size:24px}
+.dice.rolling{animation:shakeDice 0.15s infinite}
+@keyframes shakeDice{50%{transform:translate(3px,-2px) rotate(10deg)}100%{transform:translate(-2px,3px) rotate(-5deg)}}
+.bowl{position:absolute;width:230px;height:180px;background:linear-gradient(135deg, #fff, #f0f0f0);border-radius:50% 50% 50% 50% / 60% 60% 40% 40%;border-bottom:5px solid #ddd;box-shadow:0 15px 25px rgba(0,0,0,0.8);z-index:10;transition:transform 0.6s, opacity 0.3s}
+.bowl.lifted{transform:translateY(-200px) scale(1.1);opacity:0}
+.timer-circle{position:absolute;right:15px;top:40%;width:45px;height:45px;border-radius:50%;background:conic-gradient(#ff9800 0%, #333 0%);display:flex;align-items:center;justify-content:center;z-index:20}
+.timer-inner{width:39px;height:39px;background:#a61e1e;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:bold;color:#ff9800}
+.table-section{padding:4px;display:flex;flex-direction:column;gap:4px;background:#a61e1e;z-index:30}
+.grid-combos{display:grid;grid-template-columns:repeat(5,1fr);gap:2px;background:#7a1010;padding:2px;border-radius:4px}
+.combo-zone{background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.2);height:40px;display:flex;align-items:center;justify-content:center;gap:2px;cursor:pointer;position:relative}
+.combo-mult{position:absolute;top:-5px;right:-5px;background:linear-gradient(135deg,#ffd700,#b8860b);color:#000;font-size:8px;font-weight:900;padding:1px 4px;border-radius:10px;border:1px solid #fff}
+.grid-single{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;padding:10px 5px;background:#7a1010;border-radius:8px}
+.single-zone{background:#fdfbf7;border-radius:12px;height:80px;display:flex;align-items:center;justify-content:center;cursor:pointer;position:relative;box-shadow:0 4px 8px rgba(0,0,0,0.5)}
+.single-icon{font-size:40px}
+.text-red{color:#d32f2f}.text-green{color:#2e7d32}.text-blue{color:#1565c0}
+.chip-stack{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:bold;color:#fff;border:2px dashed #fff;z-index:20}
+.chip-stack.c10{background:#888}.chip-stack.c50{background:#e53935}.chip-stack.c100{background:#43a047}
+.bottom-bar{background:#2a1a12;padding:8px 10px;display:flex;align-items:center;justify-content:space-between;z-index:50}
+.user-profile{display:flex;align-items:center;gap:8px}
+.user-avatar{width:44px;height:44px;border-radius:50%;border:2px solid #ff9800;overflow:hidden}
+.user-avatar img{width:100%;height:100%}
+.user-details .bal{font-size:12px;color:#ffd700;font-weight:bold}
+.bet-controls{display:flex;gap:6px;align-items:center}
+.action-btn{display:flex;flex-direction:column;align-items:center;justify-content:center;color:#ccc;font-size:9px;cursor:pointer;width:40px;height:40px;border-radius:50%;background:rgba(255,255,255,0.1)}
+.chip-selector{width:50px;height:50px;border-radius:50%;background:#fff;border:4px solid #4caf50;display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:bold;color:#000;cursor:pointer}
+.result-overlay{position:absolute;inset:0;background:rgba(0,0,0,0.8);z-index:100;display:none;flex-direction:column;align-items:center;justify-content:center}
+.result-overlay.show{display:flex}
+.result-text{font-size:40px;font-weight:bold;color:#ffd700;margin-bottom:10px}
+.result-amount{font-size:24px;color:#fff}
+</style>
+  <link rel="stylesheet" href="css/live-users.css">
+</head>
+<body>
+<div class="app">
+  <div class="top-bar"><div>☰ 🔔</div><div class="brand">Jiowin</div></div>
+  <div class="perc-bar"><div class="perc-item"><span class="perc-icon text-red">🐟</span>15%</div><div class="perc-item"><span class="perc-icon text-green">🦐</span>16%</div><div class="perc-item"><span class="perc-icon text-blue">🍶</span>15%</div><div class="perc-item"><span class="perc-icon text-red">🐓</span>19%</div><div class="perc-item"><span class="perc-icon text-green">🦀</span>16%</div><div class="perc-item"><span class="perc-icon text-blue">🦌</span>20%</div></div>
+  <div class="main-area">
+    <div class="side-players"><div class="player"><div class="player-avatar"><img src="https://i.pravatar.cc/100?img=5"></div><div class="player-info">**A1k</div></div><div class="player"><div class="player-avatar"><img src="https://i.pravatar.cc/100?img=12"></div><div class="player-info">**8fx</div></div></div>
+    <div class="bowl-container">
+      <div class="bowl" id="bowl"></div>
+      <div class="plate"><div class="dice-wrap" id="diceWrap"><div class="dice" id="dice1">?</div><div class="dice" id="dice2">?</div><div class="dice" id="dice3">?</div></div></div>
+    </div>
+    <div class="timer-circle" id="timerCircle"><div class="timer-inner" id="timerText">15</div></div>
+  </div>
+  <div class="table-section">
+    <div class="grid-combos">
+      <div class="combo-zone" onclick="placeBet('c_fish_shrimp', this)"><span class="text-red">🐟</span><span class="text-green">🦐</span></div><div class="combo-zone" onclick="placeBet('c_fish_rooster', this)"><span class="text-red">🐟</span><span class="text-red">🐓</span></div><div class="combo-zone" onclick="placeBet('c_shrimp_gourd', this)"><span class="text-green">🦐</span><span class="text-blue">🍶</span><div class="combo-mult">12X</div></div><div class="combo-zone" onclick="placeBet('c_gourd_rooster', this)"><span class="text-blue">🍶</span><span class="text-red">🐓</span></div><div class="combo-zone" onclick="placeBet('c_rooster_crab', this)"><span class="text-red">🐓</span><span class="text-green">🦀</span></div>
+      <div class="combo-zone" onclick="placeBet('c_fish_gourd', this)"><span class="text-red">🐟</span><span class="text-blue">🍶</span></div><div class="combo-zone" onclick="placeBet('c_fish_deer', this)"><span class="text-red">🐟</span><span class="text-blue">🦌</span></div><div class="combo-zone" onclick="placeBet('c_shrimp_rooster', this)"><span class="text-green">🦐</span><span class="text-red">🐓</span></div><div class="combo-zone" onclick="placeBet('c_gourd_crab', this)"><span class="text-blue">🍶</span><span class="text-green">🦀</span></div><div class="combo-zone" onclick="placeBet('c_rooster_deer', this)"><span class="text-red">🐓</span><span class="text-blue">🦌</span><div class="combo-mult">12X</div></div>
+      <div class="combo-zone" onclick="placeBet('c_fish_crab', this)"><span class="text-red">🐟</span><span class="text-green">🦀</span></div><div class="combo-zone" onclick="placeBet('c_shrimp_deer', this)"><span class="text-green">🦐</span><span class="text-blue">🦌</span></div><div class="combo-zone" onclick="placeBet('c_shrimp_crab', this)"><span class="text-green">🦐</span><span class="text-green">🦀</span></div><div class="combo-zone" onclick="placeBet('c_gourd_deer', this)"><span class="text-blue">🍶</span><span class="text-blue">🦌</span></div><div class="combo-zone" onclick="placeBet('c_crab_deer', this)"><span class="text-green">🦀</span><span class="text-blue">🦌</span></div>
+    </div>
+    <div class="grid-single">
+      <div class="single-zone" onclick="placeBet('s_fish', this)"><div class="single-icon text-red">🐟</div></div><div class="single-zone" onclick="placeBet('s_shrimp', this)"><div class="single-icon text-green">🦐</div></div><div class="single-zone" onclick="placeBet('s_gourd', this)"><div class="single-icon text-blue">🍶</div></div>
+      <div class="single-zone" onclick="placeBet('s_rooster', this)"><div class="single-icon text-red">🐓</div></div><div class="single-zone" onclick="placeBet('s_crab', this)"><div class="single-icon text-green">🦀</div></div><div class="single-zone" onclick="placeBet('s_deer', this)"><div class="single-icon text-blue">🦌</div></div>
+    </div>
+  </div>
+  <div class="bottom-bar">
+    <div class="user-profile"><div class="user-avatar"><img src="https://i.pravatar.cc/100?img=9"></div><div class="user-details"><span class="bal">Balance ₹<span id="balUI">1000</span></span></div></div>
+    <div class="bet-controls"><div class="action-btn" onclick="againBet()">🔄</div><div class="action-btn" onclick="doubleBet()">×2</div><div class="chip-selector" id="chipBtn" onclick="changeChip()"><span id="chipUI">10</span></div><div class="action-btn" onclick="undoBet()">↩️</div><div class="action-btn" onclick="clearBet()" style="color:#ff5252">❌</div></div>
+  </div>
+  <div class="result-overlay" id="resultOverlay"><div class="result-text" id="resultText">WIN!</div><div class="result-amount" id="resultAmt">+0</div></div>
+</div>
+<script src="js/game-wallet.js"></script>
+<script>
+const CHIPS = [10, 50, 100, 500], ANIMALS = ['fish', 'shrimp', 'gourd', 'rooster', 'crab', 'deer'], ICONS = {fish: '🐟', shrimp: '🦐', gourd: '🍶', rooster: '🐓', crab: '🦀', deer: '🦌'};
+let balance = window.loadGameWalletBalance(1000), currentChipIdx = 0, userBets = {}, lastBet = {}, isRolling = false, countdown = 15, timerInterval;
+function updateUI() {
+  window.syncGameWalletBalance(balance);
+  window.syncGameWalletBalance(balance); document.getElementById('balUI').textContent = balance.toLocaleString(); document.getElementById('chipUI').textContent = CHIPS[currentChipIdx]; document.querySelectorAll('.chip-stack').forEach(el => el.remove()); for(const [zone, amt] of Object.entries(userBets)) { const el = document.querySelector(`[onclick="placeBet('${zone}', this)"]`); if(el) { const chip = document.createElement('div'); chip.className = `chip-stack c${amt>=100?100:amt>=50?50:10}`; chip.textContent = amt; el.style.position='relative'; el.appendChild(chip); } } }
+function changeChip() { currentChipIdx = (currentChipIdx + 1) % CHIPS.length; updateUI(); beep(600, 0.05); }
+function placeBet(zone, el) { if(isRolling) return; const amt = CHIPS[currentChipIdx]; if(balance < amt) { beep(200, 0.1); return; } balance -= amt; userBets[zone] = (userBets[zone] || 0) + amt; updateUI(); beep(800, 0.05); el.style.transform = 'scale(0.9)'; setTimeout(()=>el.style.transform = 'scale(1)', 100); if(!isRolling && !timerInterval) startTimer(); }
+function clearBet() { if(isRolling) return; balance += Object.values(userBets).reduce((a,b)=>a+b,0); userBets = {}; updateUI(); }
+function undoBet() { if(isRolling) return; const zones = Object.keys(userBets); if(!zones.length) return; const l = zones[zones.length-1]; balance += userBets[l]; delete userBets[l]; updateUI(); }
+function doubleBet() { if(isRolling) return; const t = Object.values(userBets).reduce((a,b)=>a+b,0); if(t === 0 || balance < t) return; balance -= t; for(const z in userBets) userBets[z] *= 2; updateUI(); }
+function againBet() { if(isRolling) return; clearBet(); const t = Object.values(lastBet).reduce((a,b)=>a+b,0); if(t === 0 || balance < t) return; balance -= t; userBets = { ...lastBet }; updateUI(); }
+function startTimer() { if(timerInterval) clearInterval(timerInterval); countdown = 15; document.getElementById('bowl').classList.remove('lifted'); timerInterval = setInterval(() => { countdown -= 0.1; if(countdown <= 0) { clearInterval(timerInterval); timerInterval = null; rollDice(); } else { document.getElementById('timerCircle').style.background = `conic-gradient(#ff9800 ${(countdown/15)*100}%, #333 ${(countdown/15)*100}%)`; document.getElementById('timerText').textContent = Math.ceil(countdown); } }, 100); }
+function rollDice() { isRolling = true; lastBet = { ...userBets }; document.getElementById('bowl').classList.add('lifted'); const dice = [document.getElementById('dice1'), document.getElementById('dice2'), document.getElementById('dice3')]; dice.forEach(d=>d.classList.add('rolling')); let ticks = 0; const iv = setInterval(() => { dice.forEach(d=>{ d.textContent = ICONS[ANIMALS[Math.floor(Math.random()*6)]]; }); beep(400+Math.random()*200, 0.03); if(++ticks>15) clearInterval(iv); }, 100); setTimeout(() => { dice.forEach(d=>d.classList.remove('rolling')); const result = []; for(let i=0; i<3; i++) result.push(ANIMALS[Math.floor(Math.random()*6)]); dice.forEach((d, i) => { d.textContent = ICONS[result[i]]; d.style.color = result[i]==='fish'||result[i]==='rooster'?'#d32f2f':result[i]==='shrimp'||result[i]==='crab'?'#2e7d32':'#1565c0'; }); beep(800, 0.2); setTimeout(() => evaluateRound(result), 500); }, 1500); }
+function evaluateRound(result) { isRolling = false; let totalWin = 0, totalBet = Object.values(userBets).reduce((a,b)=>a+b,0); const counts = {fish:0, shrimp:0, gourd:0, rooster:0, crab:0, deer:0}; result.forEach(a => counts[a]++); for(const [zone, amt] of Object.entries(userBets)) { let win = false, mult = 1; if(zone.startsWith('s_')) { const animal = zone.split('_')[1], c = counts[animal]; if(c === 1) { win = true; mult = 2; } else if(c === 2) { win = true; mult = 3; } else if(c === 3) { win = true; mult = 6; } } else if(zone.startsWith('c_')) { const parts = zone.split('_'), a1 = parts[1], a2 = parts[2]; if(counts[a1] > 0 && counts[a2] > 0) { win = true; mult = document.querySelector(`[onclick="placeBet('${zone}', this)"]`).querySelector('.combo-mult') ? 12 : 6; } } if(win) totalWin += amt * mult; } if(totalWin > 0) { balance += totalWin; showResult('WIN', totalWin - totalBet); playWinSound(); } else if(totalBet > 0) { showResult('LOSE', -totalBet); beep(200, 0.3); } if(totalBet > 0) window.recordGameRound(totalWin - totalBet); userBets = {}; updateUI(); setTimeout(() => { document.getElementById('resultOverlay').classList.remove('show'); startTimer(); }, 2500); }
+function showResult(type, amount) { document.getElementById('resultText').textContent = type; document.getElementById('resultText').style.color = type==='WIN'?'#4caf50':'#f44336'; document.getElementById('resultAmt').textContent = (amount>0?'+':'')+amount; document.getElementById('resultOverlay').classList.add('show'); }
+let audioCtx; function beep(freq, dur, type='sine', vol=0.1) { try { if(!audioCtx) audioCtx = new (window.AudioContext||window.webkitAudioContext)(); const o = audioCtx.createOscillator(), g = audioCtx.createGain(); o.type=type; o.frequency.value=freq; g.gain.setValueAtTime(vol, audioCtx.currentTime); g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime+dur); o.connect(g); g.connect(audioCtx.destination); o.start(); o.stop(audioCtx.currentTime+dur); } catch(e) {} }
+function playWinSound() { [523, 659, 784, 1047].forEach((f,i)=>setTimeout(()=>beep(f,0.2,'triangle',0.1), i*100)); }
+window.onload = () => { updateUI(); startTimer(); };
+</script>
+  <script src="js/live-users.js"></script>
+</body>
+</html>

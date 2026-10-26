@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Aviator - Jiowin Style</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;user-select:none;font-family:'Segoe UI',sans-serif}
+body{background:#000;color:#fff;min-height:100vh;display:flex;justify-content:center;overflow:hidden}
+.app{width:100%;max-width:500px;height:100vh;display:flex;flex-direction:column;background:#1e2024}
+.top-bar{background:#1e1e1e;display:flex;justify-content:space-between;padding:8px 12px;font-size:12px;color:#aaa;border-bottom:1px solid #333;z-index:50}
+.brand{font-weight:900;font-size:16px;color:#fff;}
+.brand span{background:#4caf50;color:#000;padding:1px 4px;border-radius:4px;font-size:10px}
+.aviator-header{background:#121214;padding:10px 15px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #333}
+.aviator-logo{display:flex;align-items:center;gap:8px;color:#e53935;font-size:20px;font-weight:900;font-style:italic}
+.aviator-logo .icon{background:#7c4dff;color:#fff;width:28px;height:28px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px;font-style:normal}
+.history-strip{display:flex;gap:10px;padding:8px 12px;background:#1e2024;overflow-x:auto;border-bottom:1px solid #2c2f36;scrollbar-width:none}
+.history-strip::-webkit-scrollbar{display:none}
+.hist-item{font-size:12px;font-weight:bold}
+.hist-item.red{color:#e57373}.hist-item.blue{color:#64b5f6}
+.canvas-container{position:relative;width:100%;height:220px;background:#000;overflow:hidden;border-bottom:1px solid #2c2f36}
+canvas{width:100%;height:100%;display:block}
+.waiting-bg{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;background:radial-gradient(circle at center, #2a0000 0%, #000 70%);z-index:10}
+.waiting-bg.hidden{display:none}
+.ufc-text{font-size:36px;font-weight:900;color:#e53935;letter-spacing:2px}
+.multiplier-text{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:64px;font-weight:900;color:#fff;text-shadow:0 0 20px rgba(255,255,255,0.5);z-index:20;display:none}
+.multiplier-text.show{display:block}
+.crashed-text{color:#e53935;font-size:40px;font-weight:900;z-index:25;text-align:center;display:none;flex-direction:column;background:rgba(0,0,0,0.6);padding:20px;border-radius:10px}
+.crashed-text.show{display:flex}
+.bet-panels{background:#1e2024;padding:10px;display:flex;flex-direction:column;gap:10px;z-index:30}
+.bet-panel{background:#2c2f36;border-radius:12px;padding:10px;display:flex;gap:10px}
+.panel-left{flex:1;display:flex;flex-direction:column;gap:8px}
+.input-row{display:flex;align-items:center;justify-content:space-between;background:#1e2024;border-radius:8px;padding:4px}
+.input-btn{width:32px;height:32px;background:#3f444d;border:none;color:#fff;font-size:18px;border-radius:6px;cursor:pointer}
+.input-field{background:transparent;border:none;color:#fff;font-size:16px;font-weight:bold;text-align:center;width:100%;outline:none}
+.quick-bets{display:grid;grid-template-columns:1fr 1fr;gap:4px}
+.quick-btn{background:#1e2024;border:none;color:#aaa;padding:6px;border-radius:6px;font-size:12px;cursor:pointer;text-align:left;padding-left:15px}
+.panel-right{width:50%;display:flex;flex-direction:column}
+.bet-btn{flex:1;border:none;border-radius:10px;font-size:20px;font-weight:bold;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;color:#fff}
+.bet-btn.green{background:#28a745}
+.bet-btn.orange{background:#f57c00}
+.bet-btn.red{background:#d32f2f}
+.bet-btn.disabled{background:#3f444d;color:#888;cursor:not-allowed}
+.bet-btn span.sub{font-size:14px;font-weight:normal;margin-top:5px}
+.bottom-section{background:#1e2024;border-top:1px solid #2c2f36;flex:1;display:flex;flex-direction:column;z-index:20}
+.tabs{display:flex;padding:10px 10px 0;border-bottom:1px solid #2c2f36;gap:10px}
+.tab{flex:1;text-align:center;padding:8px;color:#aaa;font-size:14px;cursor:pointer;border-bottom:2px solid transparent}
+.tab.active{color:#fff;border-bottom-color:#4caf50}
+.summary{display:flex;justify-content:space-between;align-items:center;padding:10px;background:#26292e;margin:10px;border-radius:10px}
+.bet-list{flex:1;overflow-y:auto;padding:0 10px;max-height:150px}
+.list-header{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;font-size:10px;color:#888;padding:5px 10px;font-weight:bold}
+.list-item{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;align-items:center;padding:8px 10px;border-radius:8px;margin-bottom:4px;background:#26292e;font-size:12px}
+.list-item.win{background:#1b3d22;border:1px solid #2e7d32}
+.player{display:flex;align-items:center;gap:8px}
+.player img{width:24px;height:24px;border-radius:50%}
+.win-amt{color:#4caf50;text-align:right;font-weight:bold}
+</style>
+  <link rel="stylesheet" href="css/live-users.css">
+</head>
+<body>
+<div class="app">
+  <div class="top-bar"><div>☰ 🔔</div><div class="brand">Jiowin</div></div>
+  <div class="aviator-header"><div class="aviator-logo"><div class="icon">✈️</div>Aviator</div><div style="font-weight:bold;font-size:14px;">1.22 INR</div></div>
+  <div class="history-strip" id="historyStrip"></div>
+  <div class="canvas-container" id="canvasContainer">
+    <canvas id="gameCanvas"></canvas>
+    <div class="waiting-bg" id="waitingBg">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:20px"><div class="ufc-text">UFC</div><div style="width:2px;height:30px;background:#555"></div><div style="color:#e53935;font-size:24px;font-weight:900;font-style:italic">Aviator</div></div>
+      <div style="font-size:10px;color:#aaa;letter-spacing:1px;margin-bottom:15px">OFFICIAL PARTNERS</div>
+      <div style="background:#2e7d32;padding:8px 15px;border-radius:8px;border:1px solid #4caf50;text-align:center;font-weight:bold;font-size:14px">⚙️ SPRIBE</div>
+    </div>
+    <div class="multiplier-text" id="multiplierText">1.00x</div>
+    <div class="crashed-text" id="crashedText">FLEW AWAY!<div style="font-size:20px;margin-top:10px;color:#fff" id="crashedMultiplier">1.00x</div></div>
+  </div>
+  <div class="bet-panels">
+    <div class="bet-panel">
+      <div class="panel-left">
+        <div class="input-row"><button class="input-btn" onclick="changeBet(0,-10)">-</button><input type="number" class="input-field" id="betInput0" value="17.00" readonly><button class="input-btn" onclick="changeBet(0,10)">+</button></div>
+        <div class="quick-bets"><button class="quick-btn" onclick="setBet(0,100)">100</button><button class="quick-btn" onclick="setBet(0,500)">500</button></div>
+      </div>
+      <div class="panel-right"><button class="bet-btn green" id="betBtn0" onclick="handleBetClick(0)">Bet<span class="sub" id="betBtnSub0">17.00 INR</span></button></div>
+    </div>
+    <div class="bet-panel">
+      <div class="panel-left">
+        <div class="input-row"><button class="input-btn" onclick="changeBet(1,-10)">-</button><input type="number" class="input-field" id="betInput1" value="17.00" readonly><button class="input-btn" onclick="changeBet(1,10)">+</button></div>
+        <div class="quick-bets"><button class="quick-btn" onclick="setBet(1,100)">100</button><button class="quick-btn" onclick="setBet(1,500)">500</button></div>
+      </div>
+      <div class="panel-right"><button class="bet-btn green" id="betBtn1" onclick="handleBetClick(1)">Bet<span class="sub" id="betBtnSub1">17.00 INR</span></button></div>
+    </div>
+  </div>
+  <div class="bottom-section">
+    <div class="tabs"><div class="tab active">All Bets</div><div class="tab">Previous</div><div class="tab">Top</div></div>
+    <div class="list-header"><div>Player</div><div>Bet INR</div><div style="text-align:center">X</div><div style="text-align:right">Win INR</div></div>
+    <div class="bet-list" id="liveBetsList"></div>
+  </div>
+</div>
+<script src="js/game-wallet.js"></script>
+<script>
+const FAKE_NAMES = ['j***8', 'j***5', '3***f', 's***a', 's***3', '9***e', 'j***2', 'm***1'];
+let balance = window.loadGameWalletBalance(1000), gameState = 'waiting', multiplier = 1.00, crashPoint = 1.00, countdown = 5, canvas, ctx, animationId, startTime, curvePoints = [];
+let userBets = [{ amount: 17, placed: false, cashedOut: false, win: 0 }, { amount: 17, placed: false, cashedOut: false, win: 0 }];
+
+function initCanvas() { canvas = document.getElementById('gameCanvas'); ctx = canvas.getContext('2d'); resizeCanvas(); window.addEventListener('resize', resizeCanvas); }
+function resizeCanvas() { const rect = canvas.parentElement.getBoundingClientRect(); canvas.width = rect.width; canvas.height = rect.height; }
+
+function startWaiting() {
+  gameState = 'waiting'; countdown = 5; multiplier = 1.00;
+  userBets.forEach(b => { b.placed = false; b.cashedOut = false; b.win = 0; });
+  document.getElementById('waitingBg').classList.remove('hidden'); document.getElementById('multiplierText').classList.remove('show'); document.getElementById('crashedText').classList.remove('show');
+  updateBetButtons(); clearCanvas(); generateLiveBets();
+  const waitInterval = setInterval(() => { countdown -= 0.1; if(countdown <= 0) { clearInterval(waitInterval); startFlying(); } }, 100);
+}
+
+function startFlying() {
+  gameState = 'flying'; document.getElementById('waitingBg').classList.add('hidden'); document.getElementById('multiplierText').classList.add('show');
+  document.getElementById('multiplierText').textContent = '1.00x'; multiplier = 1.00; crashPoint = generateCrashPoint();
+  startTime = performance.now(); curvePoints = []; updateBetButtons();
+  let lastTick = 0;
+  function animate(time) {
+    if(gameState !== 'flying') return;
+    const elapsed = (time - startTime) / 1000; multiplier = Math.pow(1.0005, elapsed * 1000);
+    if(multiplier >= crashPoint) { multiplier = crashPoint; crash(); return; }
+    document.getElementById('multiplierText').textContent = multiplier.toFixed(2) + 'x';
+    drawCurve(elapsed);
+    if(Math.floor(multiplier * 10) > lastTick) { beep(600, 0.02, 'sine', 0.02); lastTick = Math.floor(multiplier * 10); }
+    animationId = requestAnimationFrame(animate);
+  }
+  animationId = requestAnimationFrame(animate);
+}
+
+function crash() {
+  gameState = 'crashed'; cancelAnimationFrame(animationId);
+  document.getElementById('multiplierText').classList.remove('show'); document.getElementById('crashedText').classList.add('show'); document.getElementById('crashedMultiplier').textContent = crashPoint.toFixed(2) + 'x';
+  beep(150, 0.4, 'sawtooth', 0.1);
+  userBets.forEach(b => { if(b.placed && !b.cashedOut) b.placed = false; });
+  updateBetButtons(); addToHistoryStrip(crashPoint);
+  setTimeout(() => startWaiting(), 3000);
+}
+
+function handleBetClick(index) {
+  const bet = userBets[index];
+  if(gameState === 'waiting') {
+    if(!bet.placed) { const amt = parseInt(document.getElementById(`betInput${index}`).value); if(balance < amt) return; balance -= amt; bet.amount = amt; bet.placed = true; beep(800, 0.05, 'square', 0.05); }
+    else { balance += bet.amount; bet.placed = false; beep(400, 0.05, 'square', 0.05); }
+  } else if(gameState === 'flying') {
+    if(bet.placed && !bet.cashedOut) { bet.cashedOut = true; bet.win = bet.amount * multiplier; balance += bet.win; window.recordGameRound(bet.win - bet.amount); beep(1000, 0.1, 'triangle', 0.05); addToHistoryList(`You`, bet.amount, multiplier, bet.win, true); }
+  }
+  updateBetButtons();
+}
+
+function updateBetButtons() {
+  window.syncGameWalletBalance(balance);
+  userBets.forEach((bet, i) => {
+    const btn = document.getElementById(`betBtn${i}`); btn.className = 'bet-btn';
+    if(gameState === 'waiting') {
+      if(bet.placed) { btn.classList.add('red'); btn.innerHTML = `CANCEL <span class="sub">${bet.amount.toFixed(2)} INR</span>`; }
+      else { btn.classList.add('green'); btn.innerHTML = `Bet <span class="sub">${bet.amount.toFixed(2)} INR</span>`; }
+    } else if(gameState === 'flying') {
+      if(bet.placed && !bet.cashedOut) { btn.classList.add('orange'); btn.innerHTML = `CASHOUT <span class="sub">${(bet.amount * multiplier).toFixed(2)} INR</span>`; }
+      else { btn.classList.add('disabled'); btn.innerHTML = bet.cashedOut ? `CASHED OUT` : `Waiting...`; }
+    } else { btn.classList.add('disabled'); btn.innerHTML = `Next Round`; }
+  });
+}
+
+function clearCanvas() { if(ctx) ctx.clearRect(0, 0, canvas.width, canvas.height); curvePoints = []; }
+function drawCurve(time) {
+  clearCanvas(); ctx.fillStyle = '#000'; ctx.fillRect(0, 0, canvas.width, canvas.height);
+  const maxX = canvas.width - 40, maxY = canvas.height - 40;
+  const progress = Math.min(1, (multiplier - 1) / 10);
+  const x = progress * maxX + 20, y = maxY - (progress * progress * maxY) + 20;
+  curvePoints.push({ x, y, time }); if(curvePoints.length > 200) curvePoints.shift();
+  ctx.beginPath(); ctx.moveTo(20, maxY);
+  for(let i=0; i<curvePoints.length; i++) ctx.lineTo(curvePoints[i].x, curvePoints[i].y);
+  ctx.lineTo(x, maxY); ctx.lineTo(20, maxY);
+  const gradient = ctx.createLinearGradient(0, maxY, 0, 20); gradient.addColorStop(0, 'rgba(229, 57, 53, 0.1)'); gradient.addColorStop(1, 'rgba(229, 57, 53, 0.4)');
+  ctx.fillStyle = gradient; ctx.fill();
+  ctx.beginPath(); ctx.moveTo(20, maxY);
+  for(let i=0; i<curvePoints.length; i++) ctx.lineTo(curvePoints[i].x, curvePoints[i].y);
+  ctx.strokeStyle = '#e53935'; ctx.lineWidth = 3; ctx.stroke();
+  ctx.save(); ctx.translate(x, y);
+  const prev = curvePoints[curvePoints.length-2] || {x: 20, y: maxY}; const angle = Math.atan2(y - prev.y, x - prev.x); ctx.rotate(angle);
+  ctx.fillStyle = '#e53935'; ctx.beginPath(); ctx.moveTo(15, 0); ctx.lineTo(-10, -8); ctx.lineTo(-5, 0); ctx.lineTo(-10, 8); ctx.closePath(); ctx.fill(); ctx.restore();
+}
+
+function generateCrashPoint() { const e = Math.random(); if(e < 0.02) return 1.00; return Math.max(1.00, 99 / (100 - (e * 95))); }
+function setBet(index, val) { if(gameState !== 'waiting' || userBets[index].placed) return; document.getElementById(`betInput${index}`).value = val.toFixed(2); userBets[index].amount = val; updateBetButtons(); }
+function changeBet(index, delta) { if(gameState !== 'waiting' || userBets[index].placed) return; const input = document.getElementById(`betInput${index}`); let val = parseFloat(input.value) + delta; if(val < 10) val = 10; input.value = val.toFixed(2); userBets[index].amount = val; updateBetButtons(); }
+function addToHistoryStrip(mult) { const strip = document.getElementById('historyStrip'); const item = document.createElement('div'); item.className = `hist-item ${mult >= 2 ? 'red' : 'blue'}`; item.textContent = mult.toFixed(2) + 'x'; strip.insertBefore(item, strip.firstChild); if(strip.children.length > 15) strip.removeChild(strip.lastChild); }
+function generateLiveBets() { const list = document.getElementById('liveBetsList'); list.innerHTML = ''; for(let i=0; i<6; i++) addToHistoryList(FAKE_NAMES[Math.floor(Math.random()*FAKE_NAMES.length)], (Math.random()*5000+100).toFixed(2), null, 0, false); }
+function addToHistoryList(name, betAmt, mult, winAmt, isWin) { const list = document.getElementById('liveBetsList'); const div = document.createElement('div'); div.className = `list-item ${isWin ? 'win' : ''}`; const avatar = `https://i.pravatar.cc/100?img=${Math.floor(Math.random()*20)+1}`; const multStr = mult ? mult.toFixed(2) + 'x' : '--'; const winStr = winAmt > 0 ? winAmt.toFixed(2) : '--'; div.innerHTML = `<div class="player"><img src="${avatar}"><span>${name}</span></div><div class="bet-amt">${parseFloat(betAmt).toLocaleString('en-IN')}</div><div class="mult-x">${multStr}</div><div class="win-amt">${winStr}</div>`; if(isWin) list.insertBefore(div, list.firstChild); else list.appendChild(div); if(list.children.length > 8) list.removeChild(list.lastChild); }
+let audioCtx; function beep(freq, dur, type='sine', vol=0.1) { try { if(!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)(); const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain(); osc.type = type; osc.frequency.value = freq; gain.gain.setValueAtTime(vol, audioCtx.currentTime); gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + dur); osc.connect(gain); gain.connect(audioCtx.destination); osc.start(); osc.stop(audioCtx.currentTime + dur); } catch(e) {} }
+window.onload = () => { initCanvas(); startWaiting(); };
+</script>
+  <script src="js/live-users.js"></script>
+</body>
+</html>
