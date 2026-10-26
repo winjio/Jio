@@ -1,1 +1,13 @@
-
+.auth-overlay{position:fixed;inset:0;background:radial-gradient(circle at top,#1a237e,#050510);z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px}
+.auth-box{background:#111;border:1px solid #333;border-radius:16px;width:100%;max-width:350px;padding:25px}
+.auth-logo{font-weight:900;font-size:24px;color:#fff;text-align:center;margin-bottom:20px}
+.auth-logo span{background:#4caf50;color:#000;padding:2px 6px;border-radius:4px;font-size:16px}
+.auth-tabs{display:flex;background:#1e1e1e;border-radius:10px;margin-bottom:20px;padding:4px}
+.auth-tabs button{flex:1;background:transparent;border:none;color:#aaa;padding:10px;font-weight:bold;cursor:pointer;border-radius:8px}
+.auth-tabs button.active{background:#333;color:#fff}
+.auth-form{display:none;flex-direction:column;gap:12px}
+.auth-form.active{display:flex}
+.auth-input{width:100%;background:#1e1e1e;border:1px solid #333;color:#fff;padding:12px;border-radius:8px;outline:none}
+.auth-input:focus{border-color:#4caf50}
+.auth-btn{background:#4caf50;color:#fff;border:none;padding:14px;border-radius:8px;font-size:16px;font-weight:bold;cursor:pointer;margin-top:10px}
+.auth-msg{font-size:12px;margin-top:10px;text-align:center;color:#e53935}

@@ -1,0 +1,33 @@
+.page-header{font-size:20px;font-weight:bold;padding:15px;border-bottom:1px solid #333}
+.wallet-tabs{display:flex;background:#1e1e1e;margin:15px;border-radius:10px;padding:4px}
+.wallet-tabs button{flex:1;padding:8px;border:none;background:transparent;color:#aaa;font-weight:bold;cursor:pointer;border-radius:8px;font-size:12px}
+.wallet-tabs button.active{background:#333;color:#fff}
+.wallet-content{display:none;padding:0 15px}
+.wallet-content.active{display:block}
+.form-group{background:#1e1e1e;padding:20px;border-radius:12px;border:1px solid #333;margin-bottom:15px}
+.form-group label{display:block;font-size:13px;color:#aaa;margin-bottom:8px}
+.form-input{width:100%;background:#111;border:1px solid #444;color:#fff;padding:12px;border-radius:8px;font-size:16px;margin-bottom:15px;outline:none}
+.submit-btn{width:100%;background:#4caf50;color:#fff;border:none;padding:15px;border-radius:8px;font-size:16px;font-weight:bold;cursor:pointer}
+.submit-btn.withdraw{background:#e53935}
+.refer-card{background:linear-gradient(135deg,#1a237e,#4a148c);padding:25px;border-radius:15px;text-align:center}
+.ref-code{background:rgba(0,0,0,0.3);padding:12px;border:1px dashed #ffd700;border-radius:8px;font-size:20px;font-weight:bold;color:#ffd700;margin:15px 0}
+.copy-btn{background:#ffd700;color:#000;border:none;padding:8px 20px;border-radius:20px;font-weight:bold;cursor:pointer}
+.history-item{background:#111;border:1px solid #333;border-radius:10px;padding:12px;margin-bottom:10px;display:flex;justify-content:space-between}
+.history-left .type{font-size:14px;font-weight:bold;text-transform:capitalize}
+.history-left .date{font-size:11px;color:#888;margin-top:4px}
+.history-left .txid{font-size:10px;color:#555}
+.history-right{text-align:right}
+.history-right .amount{font-size:16px;font-weight:bold}
+.history-right .amount.deposit{color:#4caf50}
+.history-right .amount.withdraw{color:#e53935}
+.status-badge{font-size:10px;padding:2px 8px;border-radius:10px;margin-top:5px;display:inline-block}
+.status-pending{background:rgba(255,152,0,0.2);color:#ff9800}
+.status-approved{background:rgba(76,175,80,0.2);color:#4caf50}
+.status-rejected{background:rgba(229,57,53,0.2);color:#e53935}
+
+/* UPI QR shown in the Add Money section */
+.deposit-payment{text-align:center}
+.payment-title{margin:0 0 10px;color:#fff;font-size:18px}
+.payment-help{color:#bbb;font-size:13px;line-height:1.5;margin:10px 0 16px}
+.payment-qr{display:block;width:min(100%,300px);height:auto;aspect-ratio:1;object-fit:contain;background:#111;border-radius:10px;padding:8px;margin:0 auto 16px}
+.deposit-payment label{text-align:left}
